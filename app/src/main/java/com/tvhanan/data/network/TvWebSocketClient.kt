@@ -32,6 +32,7 @@ class TvWebSocketClient(
         private const val TAG = "TvHanan"
     }
 
+    @Suppress("EmptyFunctionBlock")
     private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
         override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
         override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
@@ -204,4 +205,5 @@ class TvWebSocketClient(
         } catch (e: Exception) {
             Log.w(TAG, "Failed to parse WS message: ${e.message}", e)
         }
+    }
 }

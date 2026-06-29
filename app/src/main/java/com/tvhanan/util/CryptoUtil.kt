@@ -3,6 +3,7 @@ package com.tvhanan.util
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import android.util.Log
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -11,6 +12,7 @@ import javax.crypto.spec.GCMParameterSpec
 class CryptoUtil {
 
     private companion object {
+        private const val TAG = "CryptoUtil"
         private const val KEY_ALIAS = "tvhanan_master_key"
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     }
@@ -54,6 +56,7 @@ class CryptoUtil {
             }
             String(cipher.doFinal(encrypted), Charsets.UTF_8)
         } catch (e: Exception) {
+            Log.w(TAG, "Decryption failed — returning null: ${e.message}")
             null
         }
     }

@@ -1,0 +1,41 @@
+build:
+  maxIssueThreshold: 0
+
+complexity:
+  TooManyFunctions:
+    thresholdInFiles: 20
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+  LongMethod:
+    threshold: 120
+  LongParameterList:
+    functionThreshold: 10
+    constructorThreshold: 10
+  NestedBlockDepth:
+    threshold: 5
+  TooGenericExceptionCatch:
+    active: false
+
+style:
+  FunctionNaming:
+    active: false
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    maxLineLength: 150
+  MatchingDeclarationName:
+    active: false
+  EmptyFunctionBlock:
+    active: false
+  UseRequire:
+    active: false
+  ReturnCount:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+
+naming:
+  FunctionNaming:
+    active: false
+  MatchingDeclarationName:
+    active: false

@@ -72,7 +72,25 @@ import com.tvhanan.ui.components.HapticGlassButton
 import com.tvhanan.ui.components.HapticGlassLabelButton
 import com.tvhanan.ui.components.MeshGradientBackground
 import com.tvhanan.ui.components.ZoneLabel
-import com.tvhanan.ui.theme.*
+import com.tvhanan.ui.theme.AccentWarn
+import com.tvhanan.ui.theme.BgBase
+import com.tvhanan.ui.theme.ColorKeyBlue
+import com.tvhanan.ui.theme.ColorKeyGreen
+import com.tvhanan.ui.theme.ColorKeyRed
+import com.tvhanan.ui.theme.ColorKeyYellow
+import com.tvhanan.ui.theme.ConnectedColor
+import com.tvhanan.ui.theme.ConnectingColor
+import com.tvhanan.ui.theme.DisconnectedColor
+import com.tvhanan.ui.theme.GlassBorder
+import com.tvhanan.ui.theme.MediaAccent
+import com.tvhanan.ui.theme.MediaAccent2
+import com.tvhanan.ui.theme.NavAccent
+import com.tvhanan.ui.theme.NavAccent2
+import com.tvhanan.ui.theme.NetflixRed
+import com.tvhanan.ui.theme.PrimeBlue
+import com.tvhanan.ui.theme.TextDim
+import com.tvhanan.ui.theme.TextPrimary
+import com.tvhanan.ui.theme.YoutubeRed
 import com.tvhanan.util.HapticUtil
 
 /**

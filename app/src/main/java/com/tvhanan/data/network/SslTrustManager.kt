@@ -33,11 +33,10 @@ class SslTrustManager(private val prefs: TvPreferences) {
         }
         return try {
             val chain = session.peerCertificates
-            if (chain.isEmpty()) {
+            val leaf = chain.firstOrNull() as? X509Certificate ?: run {
                 Log.w(TAG, "verifyOrTrust: empty cert chain for $hostname, allowing")
                 return true
             }
-            val leaf = chain[0] as X509Certificate
             val fingerprint = sha256Fingerprint(leaf)
             val stored = cache[hostname]
 

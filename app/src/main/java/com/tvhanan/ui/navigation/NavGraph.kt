@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tvhanan.di.ServiceLocator
 import com.tvhanan.ui.settings.SettingsViewModel
-import com.tvhanan.domain.model.TvDevice
 import com.tvhanan.ui.manual.ManualConnectScreen
 import com.tvhanan.ui.remote.RemoteScreen
 import com.tvhanan.ui.remote.RemoteViewModel
@@ -24,18 +23,6 @@ import com.tvhanan.ui.settings.SettingsScreen
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import com.tvhanan.domain.model.ConnectionState
-
-object Routes {
-    const val SCAN = "scan"
-    const val MANUAL = "manual"
-    const val REMOTE = "remote/{ip}/{port}?mac={mac}"
-    const val SETTINGS = "settings"
-
-    fun remoteRoute(device: TvDevice) =
-        "remote/${device.ipAddress}/${device.port}?mac=${device.macAddress ?: ""}"
-    fun remoteRoute(ip: String, port: Int = 8002, mac: String? = null) =
-        "remote/$ip/$port?mac=${mac ?: ""}"
-}
 
 /**
  * Navigasi grafis utama aplikasi remote TV.
@@ -130,7 +117,7 @@ fun TvRemoteNavGraph(
                 factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
                     override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                        return RemoteViewModel(ip, port, mac, serviceLocator.repository) as T
+                        return RemoteViewModel(ip, mac, serviceLocator.repository) as T
                     }
                 }
             )

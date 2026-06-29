@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class RemoteViewModel(
     private val ipAddress: String,
-    private val port: Int = 8002,
     private val macAddress: String? = null,
     private val repository: TvRepository
 ) : ViewModel() {
