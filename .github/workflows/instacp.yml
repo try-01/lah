@@ -1,0 +1,74 @@
+name: Android Comprehensive Inspection
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Mengambil kode dari repositori
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Mengonfigurasi Java JDK (Secara default menggunakan JDK 17)
+    # Anda bisa mengubah '17' menjadi '21' jika proyek Anda menggunakan Java 21
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        cache: 'gradle'
+
+    # 3. Memberikan izin eksekusi pada Gradle wrapper
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 4. Menjalankan Unit Test (Bawaan Android)
+    - name: Run Unit Tests
+      id: step_tests
+      run: ./gradlew testDebugUnitTest
+      continue-on-error: true
+
+    # 5. Menjalankan Android Lint (Bawaan Android)
+    - name: Run Android Lint
+      id: step_lint
+      run: ./gradlew lintDebug
+      continue-on-error: true
+
+    # 6. Menjalankan Ktlint Check
+    - name: Run Ktlint Check
+      id: step_ktlint
+      run: ./gradlew ktlintCheck
+      continue-on-error: true
+
+    # 7. Menjalankan Detekt Static Analysis
+    - name: Run Detekt Static Analysis
+      id: step_detekt
+      run: ./gradlew detekt
+      continue-on-error: true
+
+    # 8. Mengunggah semua laporan (HTML/XML) yang dihasilkan di semua modul ke artifact
+    - name: Upload All Reports
+      uses: actions/upload-artifact@v4
+      if: always() # Langkah ini akan selalu berjalan dalam kondisi apa pun
+      with:
+        name: android-inspection-reports
+        path: |
+          **/build/reports/
+
+    # 9. Memastikan alur kerja ditandai "gagal" jika ada langkah inspeksi yang gagal
+    - name: Check Inspection Status
+      if: always()
+      run: |
+        if [ "${{ steps.step_tests.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_lint.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_ktlint.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_detekt.outcome }}" = "failure" ]; then
+          echo "Satu atau lebih inspeksi mendeteksi adanya error!"
+          exit 1
+        fi
