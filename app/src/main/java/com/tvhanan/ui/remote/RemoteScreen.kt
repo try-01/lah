@@ -89,12 +89,12 @@ import com.tvhanan.ui.theme.MediaAccent2
 import com.tvhanan.ui.theme.NavAccent
 import com.tvhanan.ui.theme.NavAccent2
 import com.tvhanan.ui.theme.NetflixRed
+import com.tvhanan.ui.theme.PowerGradientEnd
+import com.tvhanan.ui.theme.PowerGradientStart
 import com.tvhanan.ui.theme.PrimeBlue
 import com.tvhanan.ui.theme.TextDim
 import com.tvhanan.ui.theme.TextPrimary
 import com.tvhanan.ui.theme.YoutubeRed
-import com.tvhanan.ui.theme.PowerGradientStart
-import com.tvhanan.ui.theme.PowerGradientEnd
 import com.tvhanan.util.HapticUtil
 
 /**
