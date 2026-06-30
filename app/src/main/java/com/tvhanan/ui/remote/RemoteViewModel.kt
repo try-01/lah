@@ -33,6 +33,7 @@ class RemoteViewModel(
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private val _lastSavedToken = MutableStateFlow<String?>(null)
+    val lastSavedToken: StateFlow<String?> = _lastSavedToken.asStateFlow()
 
     private val _isMacAvailable = MutableStateFlow(false)
     val isMacAvailable: StateFlow<Boolean> = _isMacAvailable.asStateFlow()
