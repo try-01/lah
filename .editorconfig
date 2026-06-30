@@ -11,3 +11,6 @@ ij_kotlin_allow_trailing_comma_on_declaration_site = true
 # Composable functions use PascalCase by convention (Google's standard)
 # Disable function-naming to allow SettingsScreen, RemoteScreen, etc.
 ktlint_function_naming = disabled
+
+# Allow backing field naming convention (_property)
+ktlint_property_naming = disabled

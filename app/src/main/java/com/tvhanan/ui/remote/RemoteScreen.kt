@@ -277,10 +277,11 @@ private fun RemoteHeaderBar(
             connectionState == ConnectionState.CONNECTED -> "Connected" to ConnectedColor
             connectionState == ConnectionState.CONNECTING -> "Menghubungkan..." to ConnectingColor
             isMacAvailable &&
-                (
-                    connectionState == ConnectionState.DISCONNECTED ||
-                        connectionState == ConnectionState.ERROR
-                ) -> "Siaga (Standby)" to ConnectingColor
+                connectionState in
+                    listOf(
+                        ConnectionState.DISCONNECTED,
+                        ConnectionState.ERROR,
+                    ) -> "Siaga (Standby)" to ConnectingColor
             connectionState == ConnectionState.DISCONNECTED -> "Terputus" to DisconnectedColor
             else -> "Error" to DisconnectedColor
         }
@@ -527,7 +528,8 @@ private fun PillRow(
                 onClick = cell.onClick,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
                 shape = shape,
-                autoRepeat = cell.autoRepeat, // SALURKAN AUTO-REPEAT DI SINI
+                // Salurkan auto-repeat di sini
+                autoRepeat = cell.autoRepeat,
                 borderColor = Color.Transparent,
             ) {
                 if (cell.icon != null) {

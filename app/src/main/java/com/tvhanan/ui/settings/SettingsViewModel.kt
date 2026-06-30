@@ -78,8 +78,8 @@ class SettingsViewModel(
         }
     }
 
-/** Dipanggil RemoteScreen begitu IP/port/mac aktif diketahui, supaya
-     * TvInfoCard di Settings langsung akurat tanpa menunggu DataStore. */
+    /** Dipanggil RemoteScreen begitu IP/port/mac aktif diketahui, supaya
+     *  TvInfoCard di Settings langsung akurat tanpa menunggu DataStore. */
     fun setActiveDevice(
         ipAddress: String,
         port: Int,
