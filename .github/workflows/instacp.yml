@@ -49,7 +49,7 @@ jobs:
     # 7. Menjalankan Detekt Static Analysis
     - name: Run Detekt Static Analysis
       id: step_detekt
-      run: ./gradlew detekt
+      run: ./gradlew :app:detekt
       continue-on-error: true
 
     # 8. Mengunggah semua laporan (HTML/XML) yang dihasilkan di semua modul ke artifact
