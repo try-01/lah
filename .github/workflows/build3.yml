@@ -51,11 +51,11 @@ jobs:
         with:
           name: debug-apk
           # Path untuk artifact dihitung dari root repository
-          path: remotetv2/app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload release APK artifact
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: remotetv2/app/build/outputs/apk/release/
+          path: app/build/outputs/apk/release/
