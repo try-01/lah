@@ -40,7 +40,7 @@ import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Input
+import androidx.compose.material.icons.automirrored.filled.Input
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -411,7 +411,7 @@ private fun PowerSourceSleepRow(
             modifier = Modifier.weight(1f).height(height),
         ) {
             // Menggunakan Simbol Input Berputar/Siklus ⇥
-            Icon(Icons.Filled.Input, contentDescription = null, tint = TextPrimary, modifier = Modifier.size((22 * scaleFactor).dp))
+            Icons.AutoMirrored.Filled.Input, contentDescription = null, tint = TextPrimary, modifier = Modifier.size((22 * scaleFactor).dp))
         }
         HapticGlassButton(
             onClick = { viewModel.sendKey(RemoteKey.HDMI) },
