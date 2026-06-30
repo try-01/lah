@@ -63,9 +63,3 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.tooling.preview)
 }
-
-detekt {
-    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
-    buildUponDefaultConfig = true
-    allRules = false
-}
