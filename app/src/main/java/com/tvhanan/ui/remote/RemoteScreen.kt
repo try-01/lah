@@ -278,10 +278,10 @@ private fun RemoteHeaderBar(
             connectionState == ConnectionState.CONNECTING -> "Menghubungkan..." to ConnectingColor
             isMacAvailable &&
                 connectionState in
-                    listOf(
-                        ConnectionState.DISCONNECTED,
-                        ConnectionState.ERROR,
-                    ) -> "Siaga (Standby)" to ConnectingColor
+                listOf(
+                    ConnectionState.DISCONNECTED,
+                    ConnectionState.ERROR,
+                ) -> "Siaga (Standby)" to ConnectingColor
             connectionState == ConnectionState.DISCONNECTED -> "Terputus" to DisconnectedColor
             else -> "Error" to DisconnectedColor
         }
