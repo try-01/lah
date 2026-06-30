@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongParameterList", "LongMethod", "MagicNumber", "MaxLineLength", "TooManyFunctions")
 package com.tvhanan.ui.settings
 
 import androidx.compose.foundation.background

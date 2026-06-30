@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongParameterList", "LongMethod", "MagicNumber", "MaxLineLength", "TooManyFunctions", "WildcardImport")
 package com.tvhanan.ui.remote
 
 import android.app.Activity

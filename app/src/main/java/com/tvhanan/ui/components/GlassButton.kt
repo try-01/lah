@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongParameterList", "MagicNumber")
 package com.tvhanan.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState

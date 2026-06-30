@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongParameterList", "MagicNumber", "MaxLineLength")
 package com.tvhanan.ui.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing

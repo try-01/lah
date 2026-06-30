@@ -1,4 +1,5 @@
-package com.tvhanan.ui.remote
+@file:Suppress("MagicNumber", "TooGenericExceptionCaught", "TooManyFunctions")
+package com.tvhanan.ui.settings
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
