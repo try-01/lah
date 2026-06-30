@@ -12,13 +12,14 @@ object HapticUtil {
     var isEnabled: Boolean = true
 
     fun init(context: Context) {
-        vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-        }
+        vibrator =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+            }
     }
 
     fun tick() {
@@ -27,9 +28,10 @@ object HapticUtil {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val effect = VibrationEffect.createOneShot(80, 255)
-            val attributes = VibrationAttributes.Builder()
-                .setUsage(VibrationAttributes.USAGE_ALARM)
-                .build()
+            val attributes =
+                VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_ALARM)
+                    .build()
             v.vibrate(effect, attributes)
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val effect = VibrationEffect.createOneShot(80, 255)

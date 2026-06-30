@@ -6,14 +6,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.WindowManager
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.ui.graphics.graphicsLayer
-import com.tvhanan.ui.components.instantCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +32,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Input
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -44,7 +43,6 @@ import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.automirrored.filled.Input
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -67,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,6 +77,7 @@ import com.tvhanan.ui.components.HapticGlassButton
 import com.tvhanan.ui.components.HapticGlassLabelButton
 import com.tvhanan.ui.components.MeshGradientBackground
 import com.tvhanan.ui.components.ZoneLabel
+import com.tvhanan.ui.components.instantCombinedClickable
 import com.tvhanan.ui.theme.AccentWarn
 import com.tvhanan.ui.theme.BgBase
 import com.tvhanan.ui.theme.ColorKeyBlue
@@ -415,7 +415,12 @@ private fun PowerSourceSleepRow(
             modifier = Modifier.weight(1f).height(height),
         ) {
             // Menggunakan Simbol Input Berputar/Siklus ⇥
-            Icon(Icons.AutoMirrored.Filled.Input, contentDescription = null, tint = TextPrimary, modifier = Modifier.size((22 * scaleFactor).dp))
+            Icon(
+                Icons.AutoMirrored.Filled.Input,
+                contentDescription = null,
+                tint = TextPrimary,
+                modifier = Modifier.size((22 * scaleFactor).dp),
+            )
         }
         HapticGlassButton(
             onClick = { viewModel.sendKey(RemoteKey.HDMI) },
@@ -723,7 +728,7 @@ private fun AppShortcutButton(
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.94f else 1f,
         animationSpec = tween(durationMillis = 70),
-        label = "appShortcutScale"
+        label = "appShortcutScale",
     )
 
     Box(

@@ -6,9 +6,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -87,14 +87,15 @@ fun GlassButton(
         }
 
     Box(
-        modifier = modifier
-            .then(clickModifier)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .then(backgroundModifier)
-            .border(1.dp, if (isPressed) GlassBorderStrong else borderColor, shape),
+        modifier =
+            modifier
+                .then(clickModifier)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .then(backgroundModifier)
+                .border(1.dp, if (isPressed) GlassBorderStrong else borderColor, shape),
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
@@ -107,28 +108,32 @@ fun Modifier.instantCombinedClickable(
     interactionSource: MutableInteractionSource,
     enabled: Boolean = true,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null
-): Modifier = this.pointerInput(interactionSource, enabled) {
-    if (!enabled) return@pointerInput
-    coroutineScope {
-        detectTapGestures(
-            onPress = { offset ->
-                val press = PressInteraction.Press(offset)
-                val job = this@coroutineScope.launch { interactionSource.emit(press) }
-                val released = tryAwaitRelease()
-                job.cancel()
-                this@coroutineScope.launch {
-                    interactionSource.emit(
-                        if (released) PressInteraction.Release(press) 
-                        else PressInteraction.Cancel(press)
-                    )
-                }
-            },
-            onTap = { onClick() },
-            onLongPress = { if (onLongClick != null) onLongClick() }
-        )
+    onLongClick: (() -> Unit)? = null,
+): Modifier =
+    this.pointerInput(interactionSource, enabled) {
+        if (!enabled) return@pointerInput
+        coroutineScope {
+            detectTapGestures(
+                onPress = { offset ->
+                    val press = PressInteraction.Press(offset)
+                    val job = this@coroutineScope.launch { interactionSource.emit(press) }
+                    val released = tryAwaitRelease()
+                    job.cancel()
+                    this@coroutineScope.launch {
+                        interactionSource.emit(
+                            if (released) {
+                                PressInteraction.Release(press)
+                            } else {
+                                PressInteraction.Cancel(press)
+                            },
+                        )
+                    }
+                },
+                onTap = { onClick() },
+                onLongPress = { if (onLongClick != null) onLongClick() },
+            )
+        }
     }
-}
 
 fun Modifier.instantClickable(
     interactionSource: MutableInteractionSource,
