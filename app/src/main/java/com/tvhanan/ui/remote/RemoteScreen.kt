@@ -93,6 +93,8 @@ import com.tvhanan.ui.theme.PrimeBlue
 import com.tvhanan.ui.theme.TextDim
 import com.tvhanan.ui.theme.TextPrimary
 import com.tvhanan.ui.theme.YoutubeRed
+import com.tvhanan.ui.theme.PowerGradientStart
+import com.tvhanan.ui.theme.PowerGradientEnd
 import com.tvhanan.util.HapticUtil
 
 /**
