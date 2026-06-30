@@ -411,7 +411,7 @@ private fun PowerSourceSleepRow(
             modifier = Modifier.weight(1f).height(height),
         ) {
             // Menggunakan Simbol Input Berputar/Siklus ⇥
-            Icons.AutoMirrored.Filled.Input, contentDescription = null, tint = TextPrimary, modifier = Modifier.size((22 * scaleFactor).dp))
+            Icon(Icons.AutoMirrored.Filled.Input, contentDescription = null, tint = TextPrimary, modifier = Modifier.size((22 * scaleFactor).dp))
         }
         HapticGlassButton(
             onClick = { viewModel.sendKey(RemoteKey.HDMI) },
