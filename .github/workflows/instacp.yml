@@ -1,10 +1,9 @@
 name: Android Comprehensive Inspection
 
 on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+  # 1. Pemicu Manual: Tidak akan build otomatis saat edit file.
+  # Action hanya akan berjalan jika Anda menekan tombol "Run workflow" di tab Actions GitHub.
+  workflow_dispatch:
 
 # Memberikan izin menulis pada repositori agar GitHub Actions bisa mengunggah hasil format otomatis
 permissions:
