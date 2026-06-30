@@ -1,4 +1,5 @@
 @file:Suppress("FunctionNaming", "MagicNumber")
+
 package com.tvhanan.ui.components
 
 import androidx.compose.foundation.Canvas
@@ -6,10 +7,10 @@ import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.graphicsLayer
 import com.tvhanan.ui.theme.BgBase
 import com.tvhanan.ui.theme.MeshBlob1
 import com.tvhanan.ui.theme.MeshBlob2
@@ -38,37 +39,43 @@ fun MeshGradientBackground(modifier: Modifier = Modifier) {
             color = MeshBlob1,
             center = Offset(size.width * 0.08f, size.height * 0.05f),
             radius = size.width * 0.62f,
-            alpha = 0.65f
+            alpha = 0.65f,
         )
         drawMeshBlob(
             color = MeshBlob2,
             center = Offset(size.width * 0.96f, size.height * 0.24f),
             radius = size.width * 0.58f,
-            alpha = 0.55f
+            alpha = 0.55f,
         )
         drawMeshBlob(
             color = MeshBlob3,
             center = Offset(size.width * 0.10f, size.height * 0.56f),
             radius = size.width * 0.62f,
-            alpha = 0.48f
+            alpha = 0.48f,
         )
         drawMeshBlob(
             color = MeshBlob4,
             center = Offset(size.width * 0.92f, size.height * 0.74f),
             radius = size.width * 0.58f,
-            alpha = 0.50f
+            alpha = 0.50f,
         )
     }
 }
 
-private fun DrawScope.drawMeshBlob(color: Color, center: Offset, radius: Float, alpha: Float) {
+private fun DrawScope.drawMeshBlob(
+    color: Color,
+    center: Offset,
+    radius: Float,
+    alpha: Float,
+) {
     drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(color.copy(alpha = alpha), color.copy(alpha = 0f)),
-            center = center,
-            radius = radius
-        ),
+        brush =
+            Brush.radialGradient(
+                colors = listOf(color.copy(alpha = alpha), color.copy(alpha = 0f)),
+                center = center,
+                radius = radius,
+            ),
         radius = radius,
-        center = center
+        center = center,
     )
 }

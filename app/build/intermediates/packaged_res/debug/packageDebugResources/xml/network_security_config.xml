@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    cleartextTrafficPermitted="true" diperlukan karena Samsung TV REST API (port 8001)
+    HANYA mendukung HTTP, bukan HTTPS. Aplikasi ini menghubungi IP lokal arbitrer
+    (user input) — CIDR notation TIDAK didukung oleh Android Network Security Config
+    di dalam elemen <domain>. Semua komunikasi terbatas pada local network.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -15,20 +15,45 @@ interface TvRepository {
     val tokenReceived: Flow<String?>
 
     suspend fun getToken(): String?
+
     suspend fun saveToken(token: String)
+
     suspend fun saveLastIp(ip: String)
+
     suspend fun saveLastPort(port: String)
+
     suspend fun saveMacAddress(mac: String)
+
     suspend fun clearPreferences()
 
     suspend fun discoverDevices(): List<TvDevice>
-    suspend fun isHostReachable(ip: String, port: Int): Boolean
 
-    suspend fun connectWithFallback(ip: String, token: String? = null): Result<Unit>
+    suspend fun isHostReachable(
+        ip: String,
+        port: Int,
+    ): Boolean
+
+    suspend fun connectWithFallback(
+        ip: String,
+        token: String? = null,
+    ): Result<Unit>
+
     fun sendKey(key: RemoteKey): Boolean
+
     fun disconnect()
 
-    suspend fun wakeOnLan(mac: String, broadcastIp: String = "255.255.255.255"): Boolean
-    suspend fun launchApp(ip: String, appId: String): Boolean
-    suspend fun closeApp(ip: String, appId: String): Boolean
+    suspend fun wakeOnLan(
+        mac: String,
+        broadcastIp: String = "255.255.255.255",
+    ): Boolean
+
+    suspend fun launchApp(
+        ip: String,
+        appId: String,
+    ): Boolean
+
+    suspend fun closeApp(
+        ip: String,
+        appId: String,
+    ): Boolean
 }

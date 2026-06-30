@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                 TvRemoteNavGraph(
                     navController = navController,
                     serviceLocator = app.serviceLocator,
-                    onExitApp = { finish() }
+                    onExitApp = { finish() },
                 )
             }
         }

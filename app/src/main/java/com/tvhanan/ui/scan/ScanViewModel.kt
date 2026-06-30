@@ -11,9 +11,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ScanViewModel(
-    private val repository: TvRepository
+    private val repository: TvRepository,
 ) : ViewModel() {
-
     private val _devices = MutableStateFlow<List<TvDevice>>(emptyList())
     val devices: StateFlow<List<TvDevice>> = _devices.asStateFlow()
 

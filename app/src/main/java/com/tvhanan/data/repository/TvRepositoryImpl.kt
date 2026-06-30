@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 class TvRepositoryImpl(
     private val discoveryService: TvDiscoveryService,
     private val webSocketClient: TvWebSocketClient,
-    private val preferences: TvPreferences
+    private val preferences: TvPreferences,
 ) : TvRepository {
-
     override val lastIp: Flow<String?> = preferences.lastIp
     override val lastPort: Flow<String?> = preferences.lastPort
     override val macAddress: Flow<String?> = preferences.macAddress
@@ -39,10 +38,15 @@ class TvRepositoryImpl(
 
     override suspend fun discoverDevices(): List<TvDevice> = discoveryService.discoverDevices()
 
-    override suspend fun isHostReachable(ip: String, port: Int): Boolean =
-        discoveryService.isHostReachable(ip, port)
+    override suspend fun isHostReachable(
+        ip: String,
+        port: Int,
+    ): Boolean = discoveryService.isHostReachable(ip, port)
 
-    override suspend fun connectWithFallback(ip: String, token: String?): Result<Unit> {
+    override suspend fun connectWithFallback(
+        ip: String,
+        token: String?,
+    ): Result<Unit> {
         return webSocketClient.connectWithFallback(ip, token).map { }
     }
 
@@ -50,12 +54,18 @@ class TvRepositoryImpl(
 
     override fun disconnect() = webSocketClient.disconnect()
 
-    override suspend fun wakeOnLan(mac: String, broadcastIp: String): Boolean =
-        WakeOnLanUtil.sendWakeOnLanWithRetry(mac, broadcastIp)
+    override suspend fun wakeOnLan(
+        mac: String,
+        broadcastIp: String,
+    ): Boolean = WakeOnLanUtil.sendWakeOnLanWithRetry(mac, broadcastIp)
 
-    override suspend fun launchApp(ip: String, appId: String): Boolean =
-        AppLauncher.launch(ip, appId)
+    override suspend fun launchApp(
+        ip: String,
+        appId: String,
+    ): Boolean = AppLauncher.launch(ip, appId)
 
-    override suspend fun closeApp(ip: String, appId: String): Boolean =
-        AppLauncher.close(ip, appId)
+    override suspend fun closeApp(
+        ip: String,
+        appId: String,
+    ): Boolean = AppLauncher.close(ip, appId)
 }

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.9.0" type="incidents">
+
+    <incident
+        id="AndroidGradlePluginVersion"
+        severity="warning"
+        message="A newer version of com.android.application than 8.9.0 is available: 9.2.1. (There is also a newer version of 8.9.𝑥 available, if upgrading to 9.2.1 is difficult: 8.9.3)">
+        <fix-alternatives>
+            <fix-replace
+                description="Change to 9.2.1"
+                family="Update versions"
+                oldString="8.9.0"
+                replacement="9.2.1"
+                priority="0"/>
+            <fix-replace
+                description="Change to 8.9.3"
+                family="Update versions"
+                robot="true"
+                independent="true"
+                oldString="8.9.0"
+                replacement="8.9.3"
+                priority="0"/>
+        </fix-alternatives>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="2"
+            column="7"
+            startOffset="17"
+            endLine="2"
+            endColumn="14"
+            endOffset="24"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.compose:compose-bom than 2024.12.01 is available: 2026.06.00">
+        <fix-replace
+            description="Change to 2026.06.00"
+            family="Update versions"
+            oldString="2024.12.01"
+            replacement="2026.06.00"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="4"
+            column="14"
+            startOffset="56"
+            endLine="4"
+            endColumn="26"
+            endOffset="68"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.datastore:datastore-preferences than 1.1.1 is available: 1.2.1">
+        <fix-replace
+            description="Change to 1.2.1"
+            family="Update versions"
+            oldString="1.1.1"
+            replacement="1.2.1"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="6"
+            column="13"
+            startOffset="99"
+            endLine="6"
+            endColumn="20"
+            endOffset="106"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.15.0 is available: 1.19.0">
+        <fix-replace
+            description="Change to 1.19.0"
+            family="Update versions"
+            oldString="1.15.0"
+            replacement="1.19.0"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="8"
+            column="11"
+            startOffset="138"
+            endLine="8"
+            endColumn="19"
+            endOffset="146"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.9.3 is available: 1.13.0">
+        <fix-replace
+            description="Change to 1.13.0"
+            family="Update versions"
+            oldString="1.9.3"
+            replacement="1.13.0"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="9"
+            column="19"
+            startOffset="165"
+            endLine="9"
+            endColumn="26"
+            endOffset="172"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.navigation:navigation-compose than 2.8.5 is available: 2.9.8">
+        <fix-replace
+            description="Change to 2.9.8"
+            family="Update versions"
+            oldString="2.8.5"
+            replacement="2.9.8"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="10"
+            column="21"
+            startOffset="193"
+            endLine="10"
+            endColumn="28"
+            endOffset="200"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="11"
+            column="13"
+            startOffset="213"
+            endLine="11"
+            endColumn="20"
+            endOffset="220"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.8.7 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.8.7"
+            replacement="2.11.0"
+            priority="0"/>
+        <location
+            file="$HOME/work/lah/lah/gradle/libs.versions.toml"
+            line="11"
+            column="13"
+            startOffset="213"
+            endLine="11"
+            endColumn="20"
+            endOffset="220"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkClientTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/tvhanan/data/network/TvWebSocketClient.kt"
+            line="37"
+            column="22"
+            startOffset="1166"
+            endLine="37"
+            endColumn="40"
+            endOffset="1184"/>
+    </incident>
+
+    <incident
+        id="TrustAllX509TrustManager"
+        severity="warning"
+        message="`checkServerTrusted` is empty, which could cause insecure network traffic due to trusting arbitrary TLS/SSL certificates presented by peers">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/tvhanan/data/network/TvWebSocketClient.kt"
+            line="38"
+            column="22"
+            startOffset="1258"
+            endLine="38"
+            endColumn="40"
+            endOffset="1276"/>
+    </incident>
+
+    <incident
+        id="CustomX509TrustManager"
+        severity="warning"
+        message="Implementing a custom `X509TrustManager` is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android&apos;s default implementation.">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/tvhanan/data/network/TvWebSocketClient.kt"
+            line="36"
+            column="55"
+            startOffset="1117"
+            endLine="36"
+            endColumn="61"
+            endOffset="1123"/>
+    </incident>
+
+    <incident
+        id="InsecureBaseConfiguration"
+        severity="warning"
+        message="Insecure Base Configuration">
+        <fix-replace
+            description="Replace with false"
+            replacement="false"
+            priority="0">
+            <range
+                file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/xml/network_security_config.xml"
+                startOffset="448"
+                endOffset="452"/>
+        </fix-replace>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/xml/network_security_config.xml"
+            line="9"
+            column="45"
+            startOffset="448"
+            endLine="9"
+            endColumn="49"
+            endOffset="452"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="Unnecessary; `SDK_INT` is always >= 30">
+        <fix-data conditional="true"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/tvhanan/util/HapticUtil.kt"
+            line="42"
+            column="13"
+            startOffset="1420"
+            endLine="42"
+            endColumn="59"
+            endOffset="1466"/>
+    </incident>
+
+    <incident
+        id="ObsoleteSdkInt"
+        severity="warning"
+        message="This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 30. Merge all the resources in this folder into `mipmap-anydpi`.">
+        <fix-data file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26" folderName="mipmap-anydpi" requiresApi="30"/>
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/mipmap-anydpi-v26"/>
+    </incident>
+
+</incidents>

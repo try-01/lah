@@ -1,4 +1,5 @@
 @file:Suppress("FunctionNaming", "LongParameterList", "MagicNumber", "MaxLineLength")
+
 package com.tvhanan.ui.components
 
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -44,36 +45,40 @@ fun DpadRing(
     onRight: () -> Unit,
     onOk: () -> Unit,
     modifier: Modifier = Modifier,
-    size: androidx.compose.ui.unit.Dp = 216.dp
+    size: androidx.compose.ui.unit.Dp = 216.dp,
 ) {
-    val sweepBrush = remember {
-        Brush.sweepGradient(
-            listOf(
-                NavAccent.copy(alpha = 0.55f),
-                NavAccent2.copy(alpha = 0.55f),
-                NavAccent.copy(alpha = 0.55f)
+    val sweepBrush =
+        remember {
+            Brush.sweepGradient(
+                listOf(
+                    NavAccent.copy(alpha = 0.55f),
+                    NavAccent2.copy(alpha = 0.55f),
+                    NavAccent.copy(alpha = 0.55f),
+                ),
             )
-        )
-    }
-    val radialBrush = remember {
-        Brush.radialGradient(
-            listOf(
-                NavAccent.copy(alpha = 0.14f),
-                Color(0xFF12141A),
-                Color(0xFF0A0B0E)
+        }
+    val radialBrush =
+        remember {
+            Brush.radialGradient(
+                listOf(
+                    NavAccent.copy(alpha = 0.14f),
+                    Color(0xFF12141A),
+                    Color(0xFF0A0B0E),
+                ),
             )
-        )
-    }
+        }
     Box(
-        modifier = modifier
-            .size(size)
-            .background(brush = sweepBrush, shape = CircleShape),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .size(size)
+                .background(brush = sweepBrush, shape = CircleShape),
+        contentAlignment = Alignment.Center,
     ) {
         Box(
-            modifier = Modifier
-                .size(size - 6.dp)
-                .background(brush = radialBrush, shape = CircleShape)
+            modifier =
+                Modifier
+                    .size(size - 6.dp)
+                    .background(brush = radialBrush, shape = CircleShape),
         ) {
             DpadArrowZone(onClick = onUp, alignment = Alignment.TopCenter, direction = DpadDirection.UP)
             DpadArrowZone(onClick = onDown, alignment = Alignment.BottomCenter, direction = DpadDirection.DOWN)
@@ -82,20 +87,22 @@ fun DpadRing(
 
             HapticGlassButton(
                 onClick = onOk,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .size(74.dp),
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .size(74.dp),
                 shape = CircleShape,
-                gradientColors = listOf(
-                    NavAccent.copy(alpha = 0.20f),
-                    NavAccent2.copy(alpha = 0.18f)
-                ),
-                borderColor = NavAccent.copy(alpha = 0.45f)
+                gradientColors =
+                    listOf(
+                        NavAccent.copy(alpha = 0.20f),
+                        NavAccent2.copy(alpha = 0.18f),
+                    ),
+                borderColor = NavAccent.copy(alpha = 0.45f),
             ) {
                 Text(
                     text = "OK",
                     color = TextPrimary,
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
                 )
             }
         }
@@ -106,22 +113,23 @@ fun DpadRing(
 private fun androidx.compose.foundation.layout.BoxScope.DpadArrowZone(
     onClick: () -> Unit,
     alignment: Alignment,
-    direction: DpadDirection
+    direction: DpadDirection,
 ) {
     val edgePadding = 2.dp
-    val zoneModifier = when (direction) {
-        DpadDirection.UP -> Modifier.align(alignment).padding(top = edgePadding)
-        DpadDirection.DOWN -> Modifier.align(alignment).padding(bottom = edgePadding)
-        DpadDirection.LEFT -> Modifier.align(alignment).padding(start = edgePadding)
-        DpadDirection.RIGHT -> Modifier.align(alignment).padding(end = edgePadding)
-    }
+    val zoneModifier =
+        when (direction) {
+            DpadDirection.UP -> Modifier.align(alignment).padding(top = edgePadding)
+            DpadDirection.DOWN -> Modifier.align(alignment).padding(bottom = edgePadding)
+            DpadDirection.LEFT -> Modifier.align(alignment).padding(start = edgePadding)
+            DpadDirection.RIGHT -> Modifier.align(alignment).padding(end = edgePadding)
+        }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.88f else 1f,
         animationSpec = tween(durationMillis = 70, easing = FastOutSlowInEasing),
-        label = "dpadArrowScale"
+        label = "dpadArrowScale",
     )
 
     LaunchedEffect(isPressed) {
@@ -129,26 +137,31 @@ private fun androidx.compose.foundation.layout.BoxScope.DpadArrowZone(
     }
 
     Box(
-        modifier = zoneModifier
-            .size(64.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .background(
-                if (isPressed) NavAccent.copy(alpha = 0.16f) else Color.Transparent,
-                CircleShape
-            )
-            .repeatingClickable(interactionSource = interactionSource, onClick = onClick),
-        contentAlignment = Alignment.Center
+        modifier =
+            zoneModifier
+                .size(64.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .background(
+                    if (isPressed) NavAccent.copy(alpha = 0.16f) else Color.Transparent,
+                    CircleShape,
+                )
+                .repeatingClickable(interactionSource = interactionSource, onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = when (direction) {
-                DpadDirection.UP -> Icons.Filled.KeyboardArrowUp
-                DpadDirection.DOWN -> Icons.Filled.KeyboardArrowDown
-                DpadDirection.LEFT -> Icons.Filled.KeyboardArrowLeft
-                DpadDirection.RIGHT -> Icons.Filled.KeyboardArrowRight
-            },
+            imageVector =
+                when (direction) {
+                    DpadDirection.UP -> Icons.Filled.KeyboardArrowUp
+                    DpadDirection.DOWN -> Icons.Filled.KeyboardArrowDown
+                    DpadDirection.LEFT -> Icons.Filled.KeyboardArrowLeft
+                    DpadDirection.RIGHT -> Icons.Filled.KeyboardArrowRight
+                },
             contentDescription = null,
             tint = TextPrimary,
-            modifier = Modifier.size(34.dp)
+            modifier = Modifier.size(34.dp),
         )
     }
 }

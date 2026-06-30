@@ -3,13 +3,11 @@ package com.tvhanan.data.network
 import android.util.Log
 import com.tvhanan.data.local.TvPreferences
 import java.security.MessageDigest
-import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
 import java.util.concurrent.ConcurrentHashMap
 import javax.net.ssl.SSLSession
 
 class SslTrustManager(private val prefs: TvPreferences) {
-
     companion object {
         private const val TAG = "SslTrustManager"
     }
@@ -26,17 +24,21 @@ class SslTrustManager(private val prefs: TvPreferences) {
         }
     }
 
-    fun verifyOrTrust(hostname: String, session: SSLSession?): Boolean {
+    fun verifyOrTrust(
+        hostname: String,
+        session: SSLSession?,
+    ): Boolean {
         if (session == null) {
             Log.w(TAG, "verifyOrTrust: null session for $hostname, allowing")
             return true
         }
         return try {
             val chain = session.peerCertificates
-            val leaf = chain.firstOrNull() as? X509Certificate ?: run {
-                Log.w(TAG, "verifyOrTrust: empty cert chain for $hostname, allowing")
-                return true
-            }
+            val leaf =
+                chain.firstOrNull() as? X509Certificate ?: run {
+                    Log.w(TAG, "verifyOrTrust: empty cert chain for $hostname, allowing")
+                    return true
+                }
             val fingerprint = sha256Fingerprint(leaf)
             val stored = cache[hostname]
 
@@ -48,8 +50,11 @@ class SslTrustManager(private val prefs: TvPreferences) {
             } else if (stored == fingerprint) {
                 true
             } else {
-                Log.w(TAG, "Certificate fingerprint mismatch for $hostname! " +
-                    "Expected $stored, got $fingerprint")
+                Log.w(
+                    TAG,
+                    "Certificate fingerprint mismatch for $hostname! " +
+                        "Expected $stored, got $fingerprint",
+                )
                 false
             }
         } catch (e: Exception) {
