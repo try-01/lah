@@ -6,7 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -79,24 +79,22 @@ fun GlassButton(
                 onClick = onClick,
             )
         } else {
-            Modifier.clickable(
+            Modifier.instantClickable(
                 interactionSource = interactionSource,
-                indication = null,
                 enabled = enabled,
                 onClick = onClick,
             )
         }
 
     Box(
-        modifier =
-            modifier
-                .then(clickModifier)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                }
-                .then(backgroundModifier)
-                .border(1.dp, if (isPressed) GlassBorderStrong else borderColor, shape),
+        modifier = modifier
+            .then(clickModifier)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .then(backgroundModifier)
+            .border(1.dp, if (isPressed) GlassBorderStrong else borderColor, shape),
         contentAlignment = Alignment.Center,
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor) {
@@ -104,6 +102,59 @@ fun GlassButton(
         }
     }
 }
+
+fun Modifier.instantCombinedClickable(
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
+): Modifier = this.pointerInput(interactionSource, enabled) {
+    if (!enabled) return@pointerInput
+    detectTapGestures(
+        onPress = { offset ->
+            val press = PressInteraction.Press(offset)
+            val job = launch { interactionSource.emit(press) }
+            val released = tryAwaitRelease()
+            job.cancel()
+            launch {
+                interactionSource.emit(
+                    if (released) PressInteraction.Release(press) 
+                    else PressInteraction.Cancel(press)
+                )
+            }
+        },
+        onTap = { onClick() },
+        onLongPress = { if (onLongClick != null) onLongClick() }
+    )
+}
+
+fun Modifier.instantClickable(
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+): Modifier =
+    this.pointerInput(interactionSource, enabled) {
+        if (!enabled) return@pointerInput
+        coroutineScope {
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                val press = PressInteraction.Press(down.position)
+
+                launch { interactionSource.emit(press) }
+
+                val up = waitForUpOrCancellation()
+
+                launch {
+                    if (up != null) {
+                        interactionSource.emit(PressInteraction.Release(press))
+                        onClick() // Picu aksi saat jari diangkat
+                    } else {
+                        interactionSource.emit(PressInteraction.Cancel(press))
+                    }
+                }
+            }
+        }
+    }
 
 fun Modifier.repeatingClickable(
     interactionSource: MutableInteractionSource,
@@ -117,9 +168,7 @@ fun Modifier.repeatingClickable(
                 val down = awaitFirstDown(requireUnconsumed = false)
                 val press = PressInteraction.Press(down.position)
 
-                launch {
-                    interactionSource.emit(press)
-                }
+                launch { interactionSource.emit(press) }
 
                 val repeatJob =
                     launch {

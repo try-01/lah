@@ -9,7 +9,11 @@ import android.view.WindowManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import com.tvhanan.ui.components.instantCombinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -714,18 +718,29 @@ private fun AppShortcutButton(
     onClose: () -> Unit,
 ) {
     val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.94f else 1f,
+        animationSpec = tween(durationMillis = 70),
+        label = "appShortcutScale"
+    )
+
     Box(
         modifier =
             modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
                 .height(height)
                 .background(
                     Brush.linearGradient(listOf(color.copy(alpha = 0.18f), color.copy(alpha = 0.06f))),
                     RoundedCornerShape(16.dp),
                 )
                 .border(1.dp, color.copy(alpha = 0.32f), RoundedCornerShape(16.dp))
-                .combinedClickable(
+                .instantCombinedClickable(
                     interactionSource = interactionSource,
-                    indication = null,
                     onClick = {
                         HapticUtil.tick()
                         onLaunch()
