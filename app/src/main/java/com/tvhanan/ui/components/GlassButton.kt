@@ -110,22 +110,24 @@ fun Modifier.instantCombinedClickable(
     onLongClick: (() -> Unit)? = null
 ): Modifier = this.pointerInput(interactionSource, enabled) {
     if (!enabled) return@pointerInput
-    detectTapGestures(
-        onPress = { offset ->
-            val press = PressInteraction.Press(offset)
-            val job = launch { interactionSource.emit(press) }
-            val released = tryAwaitRelease()
-            job.cancel()
-            launch {
-                interactionSource.emit(
-                    if (released) PressInteraction.Release(press) 
-                    else PressInteraction.Cancel(press)
-                )
-            }
-        },
-        onTap = { onClick() },
-        onLongPress = { if (onLongClick != null) onLongClick() }
-    )
+    coroutineScope {
+        detectTapGestures(
+            onPress = { offset ->
+                val press = PressInteraction.Press(offset)
+                val job = this@coroutineScope.launch { interactionSource.emit(press) }
+                val released = tryAwaitRelease()
+                job.cancel()
+                this@coroutineScope.launch {
+                    interactionSource.emit(
+                        if (released) PressInteraction.Release(press) 
+                        else PressInteraction.Cancel(press)
+                    )
+                }
+            },
+            onTap = { onClick() },
+            onLongPress = { if (onLongClick != null) onLongClick() }
+        )
+    }
 }
 
 fun Modifier.instantClickable(
