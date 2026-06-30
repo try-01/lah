@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -156,8 +156,8 @@ private fun androidx.compose.foundation.layout.BoxScope.DpadArrowZone(
                 when (direction) {
                     DpadDirection.UP -> Icons.Filled.KeyboardArrowUp
                     DpadDirection.DOWN -> Icons.Filled.KeyboardArrowDown
-                    DpadDirection.LEFT -> Icons.Filled.KeyboardArrowLeft
-                    DpadDirection.RIGHT -> Icons.Filled.KeyboardArrowRight
+                    DpadDirection.LEFT -> Icons.AutoMirrored.Filled.KeyboardArrowLeft
+                    DpadDirection.RIGHT -> Icons.AutoMirrored.Filled.KeyboardArrowRight
                 },
             contentDescription = null,
             tint = TextPrimary,
