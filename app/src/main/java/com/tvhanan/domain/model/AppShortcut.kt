@@ -26,5 +26,5 @@ package com.tvhanan.domain.model
 enum class AppShortcut(val appId: String, val label: String) {
     NETFLIX("11101200001", "Netflix"),
     PRIME_VIDEO("3201512006785", "Prime Video"),
-    YOUTUBE("111299001912", "YouTube"),
+    YOUTUBE("111299001912", "YouTube")
 }

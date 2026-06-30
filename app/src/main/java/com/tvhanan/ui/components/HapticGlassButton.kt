@@ -33,7 +33,7 @@ fun HapticGlassButton(
     contentColor: Color = TextPrimary,
     enabled: Boolean = true,
     autoRepeat: Boolean = false, // Tambahkan parameter di sini
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
     GlassButton(
         onClick = onClick,
@@ -45,7 +45,7 @@ fun HapticGlassButton(
         enabled = enabled,
         autoRepeat = autoRepeat, // Salurkan ke GlassButton
         onPressedChange = { pressed -> if (pressed) HapticUtil.tick() },
-        content = content,
+        content = content
     )
 }
 
@@ -59,7 +59,7 @@ fun HapticGlassLabelButton(
     borderColor: Color = GlassBorder,
     contentColor: Color = TextPrimary,
     autoRepeat: Boolean = false, // Tambahkan parameter di sini
-    fontSize: TextUnit = 17.sp,
+    fontSize: TextUnit = 17.sp
 ) {
     HapticGlassButton(
         onClick = onClick,
@@ -68,14 +68,14 @@ fun HapticGlassLabelButton(
         gradientColors = gradientColors,
         borderColor = borderColor,
         contentColor = contentColor,
-        autoRepeat = autoRepeat, // Salurkan ke HapticGlassButton
+        autoRepeat = autoRepeat // Salurkan ke HapticGlassButton
     ) {
         Text(
             text = label,
             color = contentColor,
             fontSize = fontSize,
             textAlign = TextAlign.Center,
-            maxLines = 1,
+            maxLines = 1
         )
     }
 }

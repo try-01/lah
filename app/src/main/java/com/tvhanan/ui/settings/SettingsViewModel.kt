@@ -1,5 +1,4 @@
 @file:Suppress("MagicNumber", "TooGenericExceptionCaught", "TooManyFunctions")
-
 package com.tvhanan.ui.settings
 
 import android.util.Log
@@ -16,13 +15,9 @@ import kotlinx.coroutines.launch
 /** Status sebuah aksi koneksi (reconnect/scan) yang ditampilkan sbg modal di SettingsScreen. */
 sealed interface ConnectionActionState {
     data object Idle : ConnectionActionState
-
     data object Loading : ConnectionActionState
-
     data class ReconnectSuccess(val device: TvDevice) : ConnectionActionState
-
     data class ScanResult(val devices: List<TvDevice>) : ConnectionActionState
-
     data class Failed(val message: String) : ConnectionActionState
 }
 
@@ -35,18 +30,19 @@ data class RemoteUiPreferences(
     val hapticEnabled: Boolean = true,
     val keepScreenOn: Boolean = true,
     val meshBackgroundEnabled: Boolean = true,
-    val remoteSize: RemoteSize = RemoteSize.FIT,
+    val remoteSize: RemoteSize = RemoteSize.FIT
 )
 
 enum class RemoteSize(val scaleFactor: Float) {
     COMPACT(0.86f),
     FIT(1.0f),
-    LARGE(1.14f),
+    LARGE(1.14f)
 }
 
 class SettingsViewModel(
-    private val repository: TvRepository,
+    private val repository: TvRepository
 ) : ViewModel() {
+
     companion object {
         private const val TAG = "SettingsViewModel"
     }
@@ -80,13 +76,7 @@ class SettingsViewModel(
 
 /** Dipanggil RemoteScreen begitu IP/port/mac aktif diketahui, supaya
      * TvInfoCard di Settings langsung akurat tanpa menunggu DataStore. */
-    fun setActiveDevice(
-        ipAddress: String,
-        port: Int,
-        macAddress: String?,
-        token: String? = null,
-        isConnected: Boolean = false,
-    ) {
+    fun setActiveDevice(ipAddress: String, port: Int, macAddress: String?, token: String? = null, isConnected: Boolean = false) {
         _tvDevice.value = TvDevice(ipAddress = ipAddress, port = port, macAddress = macAddress, token = token)
         _isActuallyConnected.value = isConnected
     }
@@ -113,12 +103,11 @@ class SettingsViewModel(
             _actionState.value = ConnectionActionState.Loading
             try {
                 val reachable = repository.isHostReachable(device.ipAddress, device.port)
-                _actionState.value =
-                    if (reachable) {
-                        ConnectionActionState.ReconnectSuccess(device)
-                    } else {
-                        ConnectionActionState.Failed("TV tidak merespons di ${device.ipAddress}")
-                    }
+                _actionState.value = if (reachable) {
+                    ConnectionActionState.ReconnectSuccess(device)
+                } else {
+                    ConnectionActionState.Failed("TV tidak merespons di ${device.ipAddress}")
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Reconnect probe failed", e)
                 _actionState.value = ConnectionActionState.Failed(e.message ?: "Gagal menghubungkan ulang")

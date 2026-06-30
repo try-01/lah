@@ -5,6 +5,7 @@ import com.tvhanan.di.ServiceLocator
 import com.tvhanan.util.HapticUtil
 
 class TvRemoteApp : Application() {
+
     lateinit var serviceLocator: ServiceLocator
         private set
 

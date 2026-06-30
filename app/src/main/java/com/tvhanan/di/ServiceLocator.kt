@@ -9,6 +9,7 @@ import com.tvhanan.data.repository.TvRepositoryImpl
 import com.tvhanan.domain.repository.TvRepository
 
 class ServiceLocator(context: Context) {
+
     private val context: Context = context.applicationContext
 
     val preferences: TvPreferences by lazy { TvPreferences(context) }
@@ -18,4 +19,5 @@ class ServiceLocator(context: Context) {
     val repository: TvRepository by lazy {
         TvRepositoryImpl(discoveryService, webSocketClient, preferences)
     }
+
 }

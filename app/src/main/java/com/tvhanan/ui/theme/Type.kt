@@ -15,52 +15,42 @@ import androidx.compose.ui.unit.sp
  * Inter utk body) tinggal taruh file .ttf di res/font/ dan ganti
  * fontFamily di TextStyle masing-masing.
  */
-val RemoteTypography =
-    Typography(
-        headlineLarge =
-            TextStyle(
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-            ),
-        titleLarge =
-            TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
-            ),
-        titleMedium =
-            TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 15.sp,
-            ),
-        bodyLarge =
-            TextStyle(
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-            ),
-        bodyMedium =
-            TextStyle(
-                fontWeight = FontWeight.Normal,
-                fontSize = 13.sp,
-            ),
-        bodySmall =
-            TextStyle(
-                fontWeight = FontWeight.Normal,
-                fontSize = 11.5.sp,
-            ),
-        labelLarge =
-            TextStyle(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp,
-            ),
-        labelMedium =
-            TextStyle(
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-            ),
-        labelSmall =
-            TextStyle(
-                fontWeight = FontWeight.Medium,
-                fontSize = 10.sp,
-                letterSpacing = 0.5.sp,
-            ),
+val RemoteTypography = Typography(
+    headlineLarge = TextStyle(
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp
+    ),
+    titleLarge = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp
+    ),
+    titleMedium = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp
+    ),
+    bodyLarge = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    ),
+    bodyMedium = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 13.sp
+    ),
+    bodySmall = TextStyle(
+        fontWeight = FontWeight.Normal,
+        fontSize = 11.5.sp
+    ),
+    labelLarge = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 19.sp
+    ),
+    labelMedium = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp
+    ),
+    labelSmall = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 10.sp,
+        letterSpacing = 0.5.sp
     )
+)

@@ -1,5 +1,4 @@
 @file:Suppress("FunctionNaming")
-
 package com.tvhanan.ui.components
 
 import androidx.compose.foundation.background
@@ -28,29 +27,28 @@ fun ZoneLabel(
     text: String,
     accentColor: Color? = null,
     accentBrush: Brush? = null,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val dashModifier =
-            Modifier
-                .size(width = 14.dp, height = 2.dp)
-                .let { base ->
-                    when {
-                        accentBrush != null -> base.background(accentBrush, RoundedCornerShape(2.dp))
-                        accentColor != null -> base.background(accentColor, RoundedCornerShape(2.dp))
-                        else -> base.background(TextFaint, RoundedCornerShape(2.dp))
-                    }
+        val dashModifier = Modifier
+            .size(width = 14.dp, height = 2.dp)
+            .let { base ->
+                when {
+                    accentBrush != null -> base.background(accentBrush, RoundedCornerShape(2.dp))
+                    accentColor != null -> base.background(accentColor, RoundedCornerShape(2.dp))
+                    else -> base.background(TextFaint, RoundedCornerShape(2.dp))
                 }
+            }
 
         Box(modifier = dashModifier)
         Spacer(modifier = Modifier.size(width = 8.dp, height = 1.dp))
         Text(
             text = text.uppercase(),
             style = MaterialTheme.typography.labelSmall,
-            color = TextFaint,
+            color = TextFaint
         )
     }
 }

@@ -25,29 +25,19 @@ import javax.net.ssl.X509TrustManager
 import kotlin.coroutines.resume
 
 class TvWebSocketClient(
-    private val sslTrustManager: SslTrustManager? = null,
+    private val sslTrustManager: SslTrustManager? = null
 ) {
+
     companion object {
         private const val TAG = "TvHanan"
     }
 
     @Suppress("EmptyFunctionBlock")
-    private val trustAllCerts =
-        arrayOf<TrustManager>(
-            object : X509TrustManager {
-                override fun checkClientTrusted(
-                    chain: Array<X509Certificate>,
-                    authType: String,
-                ) {}
-
-                override fun checkServerTrusted(
-                    chain: Array<X509Certificate>,
-                    authType: String,
-                ) {}
-
-                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
-            },
-        )
+    private val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+        override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+    })
 
     private val sslClient by lazy {
         try {
@@ -78,7 +68,6 @@ class TvWebSocketClient(
 
     private val webSocketRef = AtomicReference<WebSocket?>(null)
     private val connectionId = AtomicLong(0)
-
     @Volatile private var currentToken: String? = null
 
     private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
@@ -91,11 +80,7 @@ class TvWebSocketClient(
         Base64.encodeToString("TvHanan".toByteArray(), Base64.NO_WRAP)
     }
 
-    suspend fun connect(
-        ip: String,
-        port: Int,
-        token: String? = null,
-    ): Result<WebSocket> {
+    suspend fun connect(ip: String, port: Int, token: String? = null): Result<WebSocket> {
         val currentId = connectionId.incrementAndGet()
         disconnect()
         sslTrustManager?.loadFingerprint(ip)
@@ -107,68 +92,49 @@ class TvWebSocketClient(
             Log.d(TAG, "Connecting to $ip:$port...")
 
             val client = if (port == 8002) (sslClient ?: plainClient) else plainClient
-            val request =
-                Request.Builder()
-                    .url(buildUrl(ip, port, currentToken))
-                    .header("Origin", "https://localhost:$port")
-                    .build()
+            val request = Request.Builder()
+                .url(buildUrl(ip, port, currentToken))
+                .header("Origin", "https://localhost:$port")
+                .build()
 
             try {
-                val ws =
-                    client.newWebSocket(
-                        request,
-                        object : WebSocketListener() {
-                            override fun onOpen(
-                                ws: WebSocket,
-                                response: Response,
-                            ) {
-                                if (connectionId.get() != currentId) return
-                                Log.d(TAG, "Connected to $ip:$port")
-                                _connectionState.value = ConnectionState.CONNECTED
-                                if (continuation.isActive) {
-                                    continuation.resume(Result.success(ws))
-                                }
-                            }
+                val ws = client.newWebSocket(request, object : WebSocketListener() {
+                    override fun onOpen(ws: WebSocket, response: Response) {
+                        if (connectionId.get() != currentId) return
+                        Log.d(TAG, "Connected to $ip:$port")
+                        _connectionState.value = ConnectionState.CONNECTED
+                        if (continuation.isActive) {
+                            continuation.resume(Result.success(ws))
+                        }
+                    }
 
-                            override fun onMessage(
-                                ws: WebSocket,
-                                text: String,
-                            ) {
-                                handleMessage(text)
-                            }
+                    override fun onMessage(ws: WebSocket, text: String) {
+                        handleMessage(text)
+                    }
 
-                            override fun onFailure(
-                                ws: WebSocket,
-                                t: Throwable,
-                                response: Response?,
-                            ) {
-                                if (connectionId.get() != currentId) return
-                                val detail = t.message ?: t.javaClass.simpleName
-                                Log.e(TAG, "Failed $ip:$port: $detail")
-                                if (response != null) Log.e(TAG, "HTTP ${response.code}")
+                    override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+                        if (connectionId.get() != currentId) return
+                        val detail = t.message ?: t.javaClass.simpleName
+                        Log.e(TAG, "Failed $ip:$port: $detail")
+                        if (response != null) Log.e(TAG, "HTTP ${response.code}")
 
-                                _connectionState.value = ConnectionState.ERROR
+                        _connectionState.value = ConnectionState.ERROR
 
-                                if (continuation.isActive) {
-                                    continuation.resume(Result.failure(t))
-                                }
-                            }
+                        if (continuation.isActive) {
+                            continuation.resume(Result.failure(t))
+                        }
+                    }
 
-                            override fun onClosed(
-                                ws: WebSocket,
-                                code: Int,
-                                reason: String,
-                            ) {
-                                if (connectionId.get() != currentId) return
-                                Log.d(TAG, "Closed: $code $reason")
-                                webSocketRef.compareAndSet(ws, null)
-                                _connectionState.value = ConnectionState.DISCONNECTED
-                                if (continuation.isActive) {
-                                    continuation.resume(Result.failure(java.io.IOException("WebSocket closed: $code $reason")))
-                                }
-                            }
-                        },
-                    )
+                    override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+                        if (connectionId.get() != currentId) return
+                        Log.d(TAG, "Closed: $code $reason")
+                        webSocketRef.compareAndSet(ws, null)
+                        _connectionState.value = ConnectionState.DISCONNECTED
+                        if (continuation.isActive) {
+                            continuation.resume(Result.failure(java.io.IOException("WebSocket closed: $code $reason")))
+                        }
+                    }
+                })
 
                 webSocketRef.set(ws)
 
@@ -188,10 +154,7 @@ class TvWebSocketClient(
         }
     }
 
-    suspend fun connectWithFallback(
-        ip: String,
-        token: String? = null,
-    ): Result<WebSocket> {
+    suspend fun connectWithFallback(ip: String, token: String? = null): Result<WebSocket> {
         Log.d(TAG, "=== Connecting $ip sequentially ===")
 
         for (port in listOf(8002, 8001)) {
@@ -221,11 +184,7 @@ class TvWebSocketClient(
         _connectionState.value = ConnectionState.DISCONNECTED
     }
 
-    private fun buildUrl(
-        ip: String,
-        port: Int,
-        token: String? = null,
-    ): String {
+    private fun buildUrl(ip: String, port: Int, token: String? = null): String {
         val scheme = if (port == 8002) "wss" else "ws"
         val base = "$scheme://$ip:$port/api/v2/channels/samsung.remote.control?name=$appNameBase64"
         return if (!token.isNullOrEmpty()) "$base&token=$token" else base

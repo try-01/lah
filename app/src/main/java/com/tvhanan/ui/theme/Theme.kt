@@ -1,5 +1,4 @@
 @file:Suppress("FunctionNaming")
-
 package com.tvhanan.ui.theme
 
 import androidx.compose.material3.MaterialTheme
@@ -12,25 +11,26 @@ import androidx.compose.runtime.Composable
  * identitas warna (mesh gradient + aksen teal/oranye) konsisten dan
  * tidak berubah ikut wallpaper user.
  */
-private val TvDarkColorScheme =
-    darkColorScheme(
-        primary = NavAccent,
-        secondary = NavAccent2,
-        tertiary = AccentWarn,
-        background = BgBase,
-        surface = BgBase,
-        surfaceVariant = GlassSurface,
-        onBackground = TextPrimary,
-        onSurface = TextPrimary,
-        onSurfaceVariant = TextDim,
-        error = DisconnectedColor,
-    )
+private val TvDarkColorScheme = darkColorScheme(
+    primary = NavAccent,
+    secondary = NavAccent2,
+    tertiary = AccentWarn,
+    background = BgBase,
+    surface = BgBase,
+    surfaceVariant = GlassSurface,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextDim,
+    error = DisconnectedColor
+)
 
 @Composable
-fun TvRemoteTheme(content: @Composable () -> Unit) {
+fun TvRemoteTheme(
+    content: @Composable () -> Unit
+) {
     MaterialTheme(
         colorScheme = TvDarkColorScheme,
         typography = RemoteTypography,
-        content = content,
+        content = content
     )
 }

@@ -48,5 +48,5 @@ enum class RemoteKey(val keyCode: String, val label: String) {
     MENU("KEY_MENU", "Menu"),
     GUIDE("KEY_GUIDE", "Guide"),
     INFO("KEY_INFO", "Info"),
-    EXIT("KEY_EXIT", "Exit"),
+    EXIT("KEY_EXIT", "Exit")
 }

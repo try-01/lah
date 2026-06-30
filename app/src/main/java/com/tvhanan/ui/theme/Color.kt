@@ -6,14 +6,14 @@ import androidx.compose.ui.graphics.Color
 val BgBase = Color(0xFF0D0E12)
 
 // ===== Glass surface tokens (pengganti DpadGray/DarkSurface solid) =====
-val GlassSurface = Color(0x0FFFFFFF) // white alpha ~6%
+val GlassSurface = Color(0x0FFFFFFF)        // white alpha ~6%
 val GlassSurfacePressed = Color(0x24FFFFFF) // white alpha ~14%
-val GlassBorder = Color(0x1FFFFFFF) // white alpha ~12%
-val GlassBorderStrong = Color(0x3DFFFFFF) // white alpha ~24%
+val GlassBorder = Color(0x1FFFFFFF)         // white alpha ~12%
+val GlassBorderStrong = Color(0x3DFFFFFF)   // white alpha ~24%
 
 // ===== Text =====
 val TextPrimary = Color(0xFFF2F3F5)
-val TextDim = Color(0x80F2F3F5) // alpha ~50%
+val TextDim = Color(0x80F2F3F5)   // alpha ~50%
 val TextFaint = Color(0x52F2F3F5) // alpha ~32%
 
 // ===== Power gradient (pengganti PowerRed flat) =====
@@ -21,7 +21,7 @@ val PowerGradientStart = Color(0xFFFF6B4A)
 val PowerGradientEnd = Color(0xFFFF3D7A)
 
 // ===== Navigation / D-pad accent gradient (signature element) =====
-val NavAccent = Color(0xFF3DD9C4) // teal
+val NavAccent = Color(0xFF3DD9C4)  // teal
 val NavAccent2 = Color(0xFF2E8FFF) // blue
 
 // ===== Media transport accent =====
