@@ -1,4 +1,5 @@
 @file:Suppress("MagicNumber", "TooGenericExceptionCaught", "TooManyFunctions")
+
 package com.tvhanan.ui.remote
 
 import android.util.Log
@@ -19,9 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RemoteViewModel(
     private val ipAddress: String,
     private val macAddress: String? = null,
-    private val repository: TvRepository
+    private val repository: TvRepository,
 ) : ViewModel() {
-    
     private var tokenObserverJob: kotlinx.coroutines.Job? = null
     private val isConnecting = AtomicBoolean(false)
 
@@ -35,7 +35,7 @@ class RemoteViewModel(
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
     private val _lastSavedToken = MutableStateFlow<String?>(null)
-    
+
     private val _isMacAvailable = MutableStateFlow(false)
     val isMacAvailable: StateFlow<Boolean> = _isMacAvailable.asStateFlow()
 
@@ -50,7 +50,7 @@ class RemoteViewModel(
             }
         }
     }
-    
+
     fun connect() {
         if (!isConnecting.compareAndSet(false, true)) {
             Log.d(TAG, "connect() skipped: already connecting")
@@ -69,20 +69,22 @@ class RemoteViewModel(
                     Log.d(TAG, "Connection succeeded")
                     if (savedToken == null) {
                         tokenObserverJob?.cancel()
-                        tokenObserverJob = launch {
-                            val newToken = withTimeoutOrNull(30_000L) {
-                                repository.tokenReceived
-                                    .filterNotNull()
-                                    .firstOrNull()
+                        tokenObserverJob =
+                            launch {
+                                val newToken =
+                                    withTimeoutOrNull(30_000L) {
+                                        repository.tokenReceived
+                                            .filterNotNull()
+                                            .firstOrNull()
+                                    }
+                                if (newToken != null) {
+                                    repository.saveToken(newToken)
+                                    _lastSavedToken.value = newToken
+                                    Log.d(TAG, "First token saved: $newToken")
+                                } else {
+                                    Log.w(TAG, "Token not received within timeout")
+                                }
                             }
-                            if (newToken != null) {
-                                repository.saveToken(newToken)
-                                _lastSavedToken.value = newToken
-                                Log.d(TAG, "First token saved: $newToken")
-                            } else {
-                                Log.w(TAG, "Token not received within timeout")
-                            }
-                        }
                     } else {
                         _lastSavedToken.value = savedToken
                     }

@@ -20,16 +20,27 @@ import java.net.URL
 object AppLauncher {
     private const val TAG = "AppLauncher"
 
-    suspend fun launch(ip: String, appId: String): Boolean =
-        request(ip, appId, "POST", "launch")
+    suspend fun launch(
+        ip: String,
+        appId: String,
+    ): Boolean = request(ip, appId, "POST", "launch")
 
-    suspend fun close(ip: String, appId: String): Boolean =
-        request(ip, appId, "DELETE", "close")
+    suspend fun close(
+        ip: String,
+        appId: String,
+    ): Boolean = request(ip, appId, "DELETE", "close")
 
-    private suspend fun request(ip: String, appId: String, method: String, label: String): Boolean =
+    private suspend fun request(
+        ip: String,
+        appId: String,
+        method: String,
+        label: String,
+    ): Boolean =
         withContext(Dispatchers.IO) {
-            val connection = (URL("http://$ip:8001/api/v2/applications/$appId")
-                .openConnection() as HttpURLConnection)
+            val connection = (
+                URL("http://$ip:8001/api/v2/applications/$appId")
+                    .openConnection() as HttpURLConnection
+            )
             try {
                 connection.requestMethod = method
                 connection.connectTimeout = 4000

@@ -1,16 +1,16 @@
 @file:Suppress("FunctionNaming", "LongMethod")
+
 package com.tvhanan.ui.manual
 
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tvhanan.domain.model.TvDevice
@@ -37,7 +38,7 @@ import com.tvhanan.ui.theme.TextPrimary
 @Composable
 fun ManualConnectScreen(
     onConnect: (TvDevice) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current // 1. Deklarasikan
     var ipAddress by remember { mutableStateOf("") }
@@ -48,37 +49,39 @@ fun ManualConnectScreen(
         MeshGradientBackground(modifier = Modifier.fillMaxSize())
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(20.dp),
         ) {
             Text(
                 text = "Koneksi Manual",
                 style = MaterialTheme.typography.headlineLarge,
-                color = TextPrimary
+                color = TextPrimary,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Lihat IP TV di Menu > Network > Network Status pada TV.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = TextDim
+                color = TextDim,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            val glassFieldColors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = NavAccent.copy(alpha = 0.5f),
-                unfocusedBorderColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.12f),
-                focusedTextColor = TextPrimary,
-                unfocusedTextColor = TextPrimary,
-                cursorColor = NavAccent,
-                focusedLabelColor = NavAccent,
-                unfocusedLabelColor = TextFaint,
-                focusedPlaceholderColor = TextFaint,
-                unfocusedPlaceholderColor = TextFaint
-            )
+            val glassFieldColors =
+                OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = NavAccent.copy(alpha = 0.5f),
+                    unfocusedBorderColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.12f),
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    cursorColor = NavAccent,
+                    focusedLabelColor = NavAccent,
+                    unfocusedLabelColor = TextFaint,
+                    focusedPlaceholderColor = TextFaint,
+                    unfocusedPlaceholderColor = TextFaint,
+                )
 
             OutlinedTextField(
                 value = ipAddress,
@@ -96,7 +99,7 @@ fun ManualConnectScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 singleLine = true,
                 colors = glassFieldColors,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -109,7 +112,7 @@ fun ManualConnectScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                 singleLine = true,
                 colors = glassFieldColors,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -117,7 +120,7 @@ fun ManualConnectScreen(
             Text(
                 text = "MAC diperlukan untuk Wake-on-LAN",
                 style = MaterialTheme.typography.bodySmall,
-                color = TextFaint
+                color = TextFaint,
             )
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -130,8 +133,8 @@ fun ManualConnectScreen(
                         onConnect(
                             TvDevice(
                                 ipAddress = ipAddress.trim(),
-                                macAddress = cleanMac
-                            )
+                                macAddress = cleanMac,
+                            ),
                         )
                     } else {
                         ipError = "Format IP tidak valid"
@@ -140,7 +143,7 @@ fun ManualConnectScreen(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 gradientColors = listOf(NavAccent.copy(alpha = 0.22f), NavAccent2.copy(alpha = 0.18f)),
                 borderColor = NavAccent.copy(alpha = 0.4f),
-                enabled = ipAddress.isNotBlank()
+                enabled = ipAddress.isNotBlank(),
             ) {
                 Text("Hubungkan", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
             }
@@ -149,7 +152,7 @@ fun ManualConnectScreen(
 
             HapticGlassButton(
                 onClick = onBack,
-                modifier = Modifier.fillMaxWidth().height(52.dp)
+                modifier = Modifier.fillMaxWidth().height(52.dp),
             ) {
                 Text("Kembali", color = TextDim, style = MaterialTheme.typography.bodyMedium)
             }

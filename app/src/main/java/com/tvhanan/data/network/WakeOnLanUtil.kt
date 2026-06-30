@@ -1,20 +1,22 @@
 package com.tvhanan.data.network
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
-import java.net.InetAddress
 import java.net.Inet4Address
+import java.net.InetAddress
 import java.net.NetworkInterface
-import android.util.Log
 
 object WakeOnLanUtil {
-
     private const val TAG = "WakeOnLanUtil"
     private val WOL_PORTS = listOf(9, 7)
 
-    suspend fun sendWakeOnLan(macAddress: String, broadcastIp: String = "255.255.255.255"): Boolean =
+    suspend fun sendWakeOnLan(
+        macAddress: String,
+        broadcastIp: String = "255.255.255.255",
+    ): Boolean =
         withContext(Dispatchers.IO) {
             try {
                 val macBytes = parseMacAddress(macAddress)
@@ -27,11 +29,12 @@ object WakeOnLanUtil {
                     System.arraycopy(macBytes, 0, packetBytes, 6 + i * macBytes.size, macBytes.size)
                 }
 
-                val targetIp = if (broadcastIp == "255.255.255.255") {
-                    getRealSubnetBroadcast()
-                } else {
-                    broadcastIp
-                }
+                val targetIp =
+                    if (broadcastIp == "255.255.255.255") {
+                        getRealSubnetBroadcast()
+                    } else {
+                        broadcastIp
+                    }
 
                 val address = InetAddress.getByName(targetIp)
                 DatagramSocket().use { socket ->
@@ -53,20 +56,21 @@ object WakeOnLanUtil {
         macAddress: String,
         broadcastIp: String = "255.255.255.255",
         attempts: Int = 5,
-        intervalMillis: Long = 2000
-    ): Boolean = withContext(Dispatchers.IO) {
-        repeat(attempts) { attempt ->
-            val sent = sendWakeOnLan(macAddress, broadcastIp)
-            if (sent) {
-                Log.d(TAG, "Attempt ${attempt + 1}/$attempts sent")
-                return@withContext true
+        intervalMillis: Long = 2000,
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            repeat(attempts) { attempt ->
+                val sent = sendWakeOnLan(macAddress, broadcastIp)
+                if (sent) {
+                    Log.d(TAG, "Attempt ${attempt + 1}/$attempts sent")
+                    return@withContext true
+                }
+                if (attempt < attempts - 1) {
+                    kotlinx.coroutines.delay(intervalMillis)
+                }
             }
-            if (attempt < attempts - 1) {
-                kotlinx.coroutines.delay(intervalMillis)
-            }
+            false
         }
-        false
-    }
 
     private fun getRealSubnetBroadcast(): String {
         try {
@@ -80,7 +84,8 @@ object WakeOnLanUtil {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         return "255.255.255.255"
     }
 
