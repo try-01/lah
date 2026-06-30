@@ -59,8 +59,14 @@ object AppLauncher {
                 Log.e(TAG, "$label($appId) failed: ${e.message}")
                 false
             } finally {
-                try { connection.inputStream?.close() } catch (_: Exception) {}
-                try { connection.errorStream?.close() } catch (_: Exception) {}
+                try {
+                    connection.inputStream?.close()
+                } catch (_: Exception) {
+                }
+                try {
+                    connection.errorStream?.close()
+                } catch (_: Exception) {
+                }
                 connection.disconnect()
             }
         }
