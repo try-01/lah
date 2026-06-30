@@ -118,8 +118,10 @@ fun RemoteScreen(
     onOpenSettings: () -> Unit,
     scaleFactor: Float = 1f,
     keepScreenOn: Boolean = true,
-    hapticEnabled: Boolean = true, // Parameter baru untuk sinkronisasi getar
-    meshBackgroundEnabled: Boolean = true, // Parameter baru untuk sinkronisasi aurora
+    // Parameter baru untuk sinkronisasi getar
+    hapticEnabled: Boolean = true,
+    // Parameter baru untuk sinkronisasi aurora
+    meshBackgroundEnabled: Boolean = true,
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
@@ -274,7 +276,9 @@ private fun RemoteHeaderBar(
         when {
             connectionState == ConnectionState.CONNECTED -> "Connected" to ConnectedColor
             connectionState == ConnectionState.CONNECTING -> "Menghubungkan..." to ConnectingColor
-            isMacAvailable && (connectionState == ConnectionState.DISCONNECTED || connectionState == ConnectionState.ERROR) -> "Siaga (Standby)" to ConnectingColor
+            isMacAvailable &&
+                (connectionState == ConnectionState.DISCONNECTED ||
+                    connectionState == ConnectionState.ERROR) -> "Siaga (Standby)" to ConnectingColor
             connectionState == ConnectionState.DISCONNECTED -> "Terputus" to DisconnectedColor
             else -> "Error" to DisconnectedColor
         }
@@ -527,7 +531,7 @@ private fun PillRow(
                 if (cell.icon != null) {
                     Icon(cell.icon, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(18.dp))
                 } else {
-                    Text(text = cell.label ?: "", color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = cell.label.orEmpty(), color = TextPrimary, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

@@ -59,9 +59,9 @@ fun TvRemoteNavGraph(
             }
     }
 
-    if (startRoute == null) return
+    val route = startRoute ?: return
 
-    NavHost(navController = navController, startDestination = startRoute!!) {
+    NavHost(navController = navController, startDestination = route) {
         composable(Routes.SCAN) {
             val viewModel: ScanViewModel =
                 viewModel(
@@ -140,12 +140,12 @@ fun TvRemoteNavGraph(
             val connectionStateForSync by viewModel.connectionState.collectAsStateWithLifecycle()
 
             androidx.compose.runtime.LaunchedEffect(ip, port, connectionStateForSync) {
-                val mac = serviceLocator.repository.macAddress.first()
+                val latestMac = serviceLocator.repository.macAddress.first()
                 val token = serviceLocator.repository.getToken()
                 settingsViewModel.setActiveDevice(
                     ipAddress = ip,
                     port = port,
-                    macAddress = mac,
+                    macAddress = latestMac,
                     token = token,
                     isConnected = connectionStateForSync == ConnectionState.CONNECTED,
                 )
@@ -153,11 +153,11 @@ fun TvRemoteNavGraph(
 
             androidx.compose.runtime.LaunchedEffect(ip, port) {
                 viewModel.observeNewToken { newToken ->
-                    val mac = serviceLocator.repository.macAddress.first()
+                    val latestMac = serviceLocator.repository.macAddress.first()
                     settingsViewModel.setActiveDevice(
                         ipAddress = ip,
                         port = port,
-                        macAddress = mac,
+                        macAddress = latestMac,
                         token = newToken,
                         isConnected = true,
                     )
@@ -175,8 +175,10 @@ fun TvRemoteNavGraph(
                 },
                 scaleFactor = uiPrefs.remoteSize.scaleFactor,
                 keepScreenOn = uiPrefs.keepScreenOn,
-                hapticEnabled = uiPrefs.hapticEnabled, // Salurkan status getar
-                meshBackgroundEnabled = uiPrefs.meshBackgroundEnabled, // Salurkan status latar belakang aurora
+                // Salurkan status getar
+                hapticEnabled = uiPrefs.hapticEnabled,
+                // Salurkan status latar belakang aurora
+                meshBackgroundEnabled = uiPrefs.meshBackgroundEnabled,
             )
         }
 

@@ -1,0 +1,13 @@
+# https://editorconfig.org
+root = true
+
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 140
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_allow_trailing_comma_on_declaration_site = true
+
+# Composable functions use PascalCase by convention (Google's standard)
+# Disable function-naming to allow SettingsScreen, RemoteScreen, etc.
+ktlint_function_naming = disabled

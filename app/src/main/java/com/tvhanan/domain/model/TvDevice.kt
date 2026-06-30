@@ -4,6 +4,7 @@ data class TvDevice(
     val ipAddress: String,
     val name: String = "Samsung TV",
     val macAddress: String? = null,
-    val port: Int = 8002, // Prioritaskan 8002 sebagai port bawaan
+    // Prioritaskan 8002 sebagai port bawaan
+    val port: Int = 8002,
     val token: String? = null,
 )

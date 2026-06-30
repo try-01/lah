@@ -111,9 +111,10 @@ fun ScanScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            if (error != null) {
+            val currentError = error
+            if (currentError != null) {
                 Text(
-                    text = error!!,
+                    text = currentError,
                     color = DisconnectedColor,
                     style = MaterialTheme.typography.bodyMedium,
                 )

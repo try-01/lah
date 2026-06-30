@@ -45,12 +45,7 @@ object HapticUtil {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val effect = VibrationEffect.createOneShot(50, 255)
-            v.vibrate(effect)
-        } else {
-            @Suppress("DEPRECATION")
-            v.vibrate(50)
-        }
+        val effect = VibrationEffect.createOneShot(50, 255)
+        v.vibrate(effect)
     }
 }
