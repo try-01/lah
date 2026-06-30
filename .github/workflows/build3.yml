@@ -14,6 +14,9 @@ on:
   #     - 'remotetv1/**'
 
 # 2. Mengatur folder kerja default untuk semua perintah (run), agar tidak perlu mengulang-ulang path
+defaults:
+  run:
+    working-directory: ./remote
 
 jobs:
   build:

@@ -1,0 +1,42 @@
+​Saya telah menganalisis keseluruhan kode dengan fokus pada efisiensi, pencarian dead code, bug, dan race condition. Berikut adalah hasil temuan teknisnya:
+​🐛 Bug & Race Condition Kritis
+​StateFlow Token Tidak Direset (TvWebSocketClient.kt & RemoteViewModel.kt): Ini adalah race condition dan bug logika terbesar. Di TvWebSocketClient, variabel _tokenReceived adalah StateFlow yang menyimpan token terakhir. Saat memanggil connect() untuk koneksi baru, nilai ini tidak di-reset menjadi null. Akibatnya, pada blok withTimeoutOrNull di RemoteViewModel.connect(), kolektor akan langsung menerima token lama dari sesi sebelumnya secara instan jika pengguna mencoba menyambung ke TV baru atau TV yang tokennya sudah kedaluwarsa.
+Solusi: Tambahkan _tokenReceived.value = null di awal fungsi connect() pada TvWebSocketClient.kt.
+​Kehilangan Permintaan Haptic (HapticUtil.kt):
+Di Android API versi terbaru, sistem haptic bisa membatalkan permintaan getar beruntun jika tidak dikelola. Saat pengguna menahan tombol volume/channel yang memiliki modifier autoRepeat = true, fungsi tick() dipanggil sangat cepat (setiap 100ms). Pada beberapa perangkat, ini bisa menyebabkan antrean VibratorManager macet atau mengabaikan input.
+Solusi: Berikan batas debounce kecil pada HapticUtil atau gunakan efek getar berulang yang lebih ringan untuk tombol auto-repeat.
+​⚠️ Potensi Masalah & Edge Cases
+​Batas Waktu Timeout Pengambilan Info (TvDiscoveryService.kt):
+Fungsi fetchDeviceInfo menggunakan connectTimeout = 1000 dan readTimeout = 1000. Jika jaringan Wi-Fi sedikit lambat, koneksi HTTP API /api/v2/ akan sering gagal, menyebabkan banyak TV terdeteksi dengan nama generik "Samsung TV" dan tanpa alamat MAC. Naikkan sedikit menjadi 2000 (2 detik) untuk keandalan.
+​Pencarian Alamat MAC yang Tidak Lengkap (TvDiscoveryService.kt):
+Kode saat ini mengambil device.optString("wifiMac", ""). Jika pengguna menyambungkan TV Samsung menggunakan kabel LAN (Ethernet), nilai wifiMac sering kali kosong atau tidak ada, dan TV menggunakan kunci mac biasa.
+Solusi: Ubah menjadi device.optString("wifiMac", device.optString("mac", "")).
+​Metode POST Kosong Tanpa Output (AppLauncher.kt):
+Fungsi request() mengirimkan metode POST untuk menjalankan aplikasi. Pada Android versi tertentu, HttpURLConnection akan melempar exception jika metode POST dikirim tanpa mengatur streaming mode atau doOutput.
+Solusi: Walaupun body kosong, tambahkan connection.instanceFollowRedirects = false dan tangani request property dengan lebih ketat.
+​🧹 Dead Code & Inefisiensi
+​Penyimpanan SharedPreferences yang Overwrite (TvPreferences.kt):
+Aplikasi saat ini menyimpan KEY_LAST_IP, KEY_TOKEN, dan KEY_MAC_ADDRESS sebagai entri tunggal. Fungsi ini berjalan dengan baik untuk satu TV. Namun, desain ini adalah dead end jika berencana mendukung lebih dari satu TV di masa depan karena data TV lama akan selalu tertimpa oleh TV baru.
+​Modifier Clickable Berlipat (GlassButton.kt):
+saya menggunakan deteksi interaksi kustom instantCombinedClickable, instantClickable, dan repeatingClickable. Secara teknis ini bukan dead code, namun pembuatan coroutine berulang di dalam awaitEachGesture untuk setiap sentuhan berpotensi menciptakan sedikit sampah memori (Garbage Collection noise) saat pengguna menekan D-Pad dengan sangat cepat.
+
+Berikut adalah hasil analisis mendalam terakhir dari kode
+🔒 1. Isu Keamanan (Security)
+Transmisi Token Plaintext (Port 8001): Pada TvWebSocketClient, jika aplikasi melakukan fallback ke port 8001, protokol yang digunakan adalah ws:// (bukan wss://). Token dikirim sebagai query parameter di URL. Artinya, jika pengguna berada di jaringan Wi-Fi publik (seperti hotel atau kafe), token ini dapat disadap (sniffed) dalam bentuk teks terang (plaintext).
+Realitas: Ini adalah limitasi bawaan dari Samsung REST API untuk TV lawas. saya tidak bisa memaksanya menjadi HTTPS. Namun, saya harus menyadarinya dan mungkin memberikan peringatan kecil di UI jika koneksi terjadi di port 8001 bahwa koneksi tidak dienkripsi.
+TrustManager Sangat Longgar: trustAllCerts di TvWebSocketClient menerima semua sertifikat X.509 tanpa melempar CertificateException. Ini wajar untuk konsep TOFU (Trust On First Use), tetapi saya sepenuhnya bergantung pada hostnameVerifier untuk menolaknya. Jika ada kegagalan validasi pada lapisan verifier, koneksi terputus dengan error generik, yang membuat debugging SSL MITM (Man-in-the-Middle) menjadi sulit.
+🌐 2. Jaringan & Potensi Kebocoran (Resource Leaks)
+Kebocoran Socket pada AppLauncher & TvDiscoveryService:
+Pada HttpURLConnection di Android, memanggil connection.disconnect() saja tidak cukup. Jika saya tidak membaca/menutup inputStream atau errorStream, Android tidak bisa mengembalikan koneksi tersebut ke Connection Pool. Jika fitur scan atau launch app dijalankan berulang kali, ini bisa menyebabkan kebocoran file descriptor (Socket Leak).
+Solusi: harus selalu memanggil connection.inputStream.close() (dan mengecek errorStream) di dalam blok finally sebelum disconnect().
+WOL (Wake-On-LAN) Salah Sasaran Saat VPN Aktif:
+Pada WakeOnLanUtil.getRealSubnetBroadcast(), mengambil antarmuka pertama yang !isLoopback && isUp. Jika pengguna sedang menyalakan VPN (seperti Google One VPN, WireGuard, atau AdGuard), antarmuka VPN sering kali berada di urutan teratas. Akibatnya, Magic Packet WOL dikirim ke subnet VPN (misal 10.0.x.x), bukan ke jaringan Wi-Fi lokal (192.168.1.255), sehingga TV gagal dinyalakan tanpa ada error di log.
+Solusi: Filter pencarian interface secara spesifik untuk tipe jaringan Wi-Fi atau Ethernet, atau lakukan broadcast ke semua antarmuka non-loopback yang aktif sekaligus.
+📱 3. UI/UX & Compose Gotchas
+Masalah Backstack Saat Koneksi Manual dari Settings:
+Di NavGraph, ketika fungsi onManualConnect dipanggil dari SettingsScreen, saya menggunakan popUpTo(Routes.SCAN). Namun, pengguna saat itu sedang berada di rute: SCAN -> REMOTE -> SETTINGS. Sistem pop-up ini bisa menyebabkan layar berkedip (flicker) atau meninggalkan status ViewModel lama yang menggantung (zombie state).
+Validasi Input IP Address yang Kaku:
+Di ManualConnectScreen, onValueChange hanya mengizinkan angka dan titik. Meskipun mencegah huruf, ini tidak mencegah pengguna menekan titik berulang kali (contoh: 192..168.1.1). Ini membuat UX terasa sedikit canggung saat pengguna mencoba menghapus atau mengedit IP di tengah-tengah teks.
+
+
+

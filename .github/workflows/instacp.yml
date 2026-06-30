@@ -5,6 +5,10 @@ on:
   # Action hanya akan berjalan jika Anda menekan tombol "Run workflow" di tab Actions GitHub.
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: ./remote
+
 # Memberikan izin menulis pada repositori agar GitHub Actions bisa mengunggah hasil format otomatis
 permissions:
   contents: write
