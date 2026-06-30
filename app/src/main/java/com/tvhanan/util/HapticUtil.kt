@@ -23,21 +23,25 @@ object HapticUtil {
 
     fun tick() {
         val v = vibrator ?: return
-
         if (!isEnabled) return
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val effect = VibrationEffect.createOneShot(50, 255)
-            val attributes = VibrationAttributes.Builder()
-                .setUsage(VibrationAttributes.USAGE_TOUCH)
-                .build()
-            v.vibrate(effect, attributes)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val effect = VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                val attributes = VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_MEDIA)
+                    .build()
+                v.vibrate(effect, attributes)
+            } else {
+                v.vibrate(effect)
+            }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val effect = VibrationEffect.createOneShot(50, 255)
+            val effect = VibrationEffect.createOneShot(70, VibrationEffect.DEFAULT_AMPLITUDE)
             v.vibrate(effect)
         } else {
             @Suppress("DEPRECATION")
-            v.vibrate(50)
+            v.vibrate(70)
         }
     }
 }
