@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+# Memberikan izin menulis pada repositori agar GitHub Actions bisa mengunggah hasil format otomatis
+permissions:
+  contents: write
+
 jobs:
   inspect:
     runs-on: ubuntu-latest
@@ -15,8 +19,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # 2. Mengonfigurasi Java JDK (Secara default menggunakan JDK 17)
-    # Anda bisa mengubah '17' menjadi '21' jika proyek Anda menggunakan Java 21
+    # 2. Mengonfigurasi Java JDK 17
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -28,40 +31,51 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 4. Menjalankan Unit Test (Bawaan Android)
+    # 4. Menjalankan Unit Test
     - name: Run Unit Tests
       id: step_tests
-      run: ./gradlew testDebugUnitTest
+      run: ./gradlew :app:testDebugUnitTest
       continue-on-error: true
 
-    # 5. Menjalankan Android Lint (Bawaan Android)
+    # 5. Menjalankan Android Lint
     - name: Run Android Lint
       id: step_lint
-      run: ./gradlew lintDebug
+      run: ./gradlew :app:lintDebug
       continue-on-error: true
 
-    # 6. Menjalankan Ktlint Check
+    # 6. OTOMATISASI KTLINT: Menjalankan perapian format kode otomatis
+    - name: Run Ktlint Format
+      run: ./gradlew :app:ktlintFormat
+      continue-on-error: true
+
+    # 7. OTOMATISASI KTLINT: Melakukan komit dan push jika ada perubahan format
+    - name: Commit formatted code
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "style: auto-format code with ktlintFormat"
+
+    # 8. Verifikasi ulang Ktlint Check pasca-format
     - name: Run Ktlint Check
       id: step_ktlint
-      run: ./gradlew ktlintCheck
+      run: ./gradlew :app:ktlintCheck
       continue-on-error: true
 
-    # 7. Menjalankan Detekt Static Analysis
+    # 9. Menjalankan Detekt Static Analysis
     - name: Run Detekt Static Analysis
       id: step_detekt
-      run: ./gradlew detekt
+      run: ./gradlew :app:detektDebug
       continue-on-error: true
 
-    # 8. Mengunggah semua laporan (HTML/XML) yang dihasilkan di semua modul ke artifact
+    # 10. Mengunggah semua laporan (HTML/XML) ke artifact
     - name: Upload All Reports
       uses: actions/upload-artifact@v4
-      if: always() # Langkah ini akan selalu berjalan dalam kondisi apa pun
+      if: always()
       with:
         name: android-inspection-reports
         path: |
           **/build/reports/
 
-    # 9. Memastikan alur kerja ditandai "gagal" jika ada langkah inspeksi yang gagal
+    # 11. Cek status akhir alur kerja
     - name: Check Inspection Status
       if: always()
       run: |

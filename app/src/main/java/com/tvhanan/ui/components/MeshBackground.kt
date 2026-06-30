@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "MagicNumber")
 package com.tvhanan.ui.components
 
 import androidx.compose.foundation.Canvas

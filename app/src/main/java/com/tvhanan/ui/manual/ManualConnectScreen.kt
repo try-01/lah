@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongMethod")
 package com.tvhanan.ui.manual
 
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController

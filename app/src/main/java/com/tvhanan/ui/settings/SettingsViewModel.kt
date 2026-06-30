@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber", "TooGenericExceptionCaught", "TooManyFunctions")
 package com.tvhanan.ui.settings
 
 import android.util.Log

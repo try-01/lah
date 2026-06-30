@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongMethod", "MaxLineLength")
 package com.tvhanan.ui.scan
 
 import androidx.compose.foundation.background

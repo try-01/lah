@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming")
 package com.tvhanan.ui.components
 
 import androidx.compose.foundation.background

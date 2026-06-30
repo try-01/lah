@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming")
 package com.tvhanan.ui.theme
 
 import androidx.compose.material3.MaterialTheme

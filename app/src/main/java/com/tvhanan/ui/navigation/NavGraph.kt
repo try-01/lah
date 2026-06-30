@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming", "LongMethod", "MagicNumber")
 package com.tvhanan.ui.navigation
 
 import androidx.compose.runtime.Composable
