@@ -1,19 +1,12 @@
 name: Android CI 1
 
 on:
-  # 1. Pemicu Manual: Tidak akan build otomatis saat edit file.
-  # Action hanya akan berjalan jika Anda menekan tombol "Run workflow" di tab Actions GitHub.
   workflow_dispatch:
-
-  # Opsional: Jika suatu saat Anda ingin otomatis build TETAPI HANYA ketika ada
-  # perubahan kode di dalam folder remotetv1 (edit README di luar folder tidak memicu build).
-  # Hapus tanda pagar (#) di bawah ini jika ingin mengaktifkannya:
   # push:
   #   branches: [ main, master ]
   #   paths:
-  #     - 'remotetv1/**'
+  #     - 'remote/**'  # Diperbaiki dari remotetv1
 
-# 2. Mengatur folder kerja default untuk semua perintah (run), agar tidak perlu mengulang-ulang path
 defaults:
   run:
     working-directory: ./remote
@@ -31,21 +24,20 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          # 3. Cache Gradle bawaan setup-java.
-          # Jauh lebih cepat dan efisien daripada menggunakan action cache terpisah.
           cache: 'gradle'
+          # WAJIB DITAMBAHKAN agar cache bekerja untuk project di dalam folder 'remote'
+          cache-dependency-path: 'remote/**/*.gradle*' 
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
       - name: Build and Test (Optimized)
-        # 4. Menggabungkan Test dan Build dalam satu perintah agar Gradle tidak melakukan inisialisasi berulang.
-        # Menambahkan flag --parallel, --build-cache, dan --configure-on-demand agar proses sangat cepat.
+        # Menambahkan prefix :app: agar build lebih terarah pada modul aplikasi utama
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            ./gradlew testDebugUnitTest assembleDebug assembleRelease --no-daemon --parallel --build-cache --configure-on-demand
+            ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease --no-daemon --parallel --build-cache --configure-on-demand
           else
-            ./gradlew testDebugUnitTest assembleDebug --no-daemon --parallel --build-cache --configure-on-demand
+            ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon --parallel --build-cache --configure-on-demand
           fi
         shell: bash
 
@@ -53,12 +45,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
-          # Path untuk artifact dihitung dari root repository
-          path: app/build/outputs/apk/debug/app-debug.apk
+          # Path diperbaiki dengan awalan remote/
+          path: remote/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload release APK artifact
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: app/build/outputs/apk/release/
+          # Path diperbaiki dengan awalan remote/
+          path: remote/app/build/outputs/apk/release/
+          
