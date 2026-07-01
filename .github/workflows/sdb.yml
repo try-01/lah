@@ -1,0 +1,40 @@
+name: Compile Tizen SDB for ARM64
+
+on:
+  workflow_dispatch: # Mengizinkan eksekusi manual via dashboard GitHub
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm # Menggunakan mesin native ARM64 resmi dari GitHub
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git build-essential libssl-dev libudev-dev
+
+      - name: Clone SDB Repository
+        run: |
+          git clone https://github.com/TizenTeam/sdb.git sdb-source
+
+      - name: Compile SDB
+        run: |
+          cd sdb-source
+          make
+
+      - name: Find and Prepare Binary
+        run: |
+          mkdir -p output
+          # Mencari file biner bernama 'sdb' hasil kompilasi, lalu disalin ke folder output
+          find sdb-source/ -name "sdb" -type f -executable -exec cp {} output/ \;
+
+      - name: Test Compiled SDB
+        run: |
+          # Memverifikasi arsitektur biner yang berhasil dibuat
+          file output/sdb
+          output/sdb version || true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdb-arm64
+          path: output/sdb
