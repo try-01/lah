@@ -1,5 +1,7 @@
 package com.screenm.discovery
 
+import android.content.Context
+import android.net.wifi.WifiManager
 import android.util.Log
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -8,7 +10,7 @@ import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.SocketTimeoutException
 
-class SsdpDiscovery {
+class SsdpDiscovery(private val context: Context) {
 
     data class DiscoveredDevice(val ip: String, val location: String?, val server: String?)
 
@@ -18,12 +20,19 @@ class SsdpDiscovery {
         val sock = DatagramSocket(null)
         val networkIps = getLocalIps()
 
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        val multicastLock = wifiManager?.createMulticastLock("screenM_ssdp_lock")
+        multicastLock?.setReferenceCounted(false)
+        multicastLock?.acquire()
+
         try {
             sock.reuseAddress = true
             sock.bind(InetSocketAddress(MULTICAST_PORT))
             sock.soTimeout = timeoutMs.toInt()
 
             val searchMessage = buildMSearch()
+            Log.i(TAG, "Sending M-SEARCH from ${networkIps.size} interfaces, target=$SEARCH_TARGET")
+
             for (localIp in networkIps) {
                 val packet = DatagramPacket(
                     searchMessage, searchMessage.size,
@@ -31,8 +40,10 @@ class SsdpDiscovery {
                 )
                 packet.address = multicastGroup
                 sock.send(packet)
+                Log.d(TAG, "M-SEARCH sent from ${localIp.hostAddress}")
             }
 
+            var count = 0
             while (true) {
                 try {
                     val buf = ByteArray(4096)
@@ -42,17 +53,25 @@ class SsdpDiscovery {
 
                     if (isSamsungResponse(response)) {
                         val ip = receivePacket.address.hostAddress ?: continue
+                        count++
+                        Log.i(TAG, "SSDP response #$count from $ip")
                         results.add(DiscoveredDevice(
                             ip = ip,
                             location = extractHeader(response, "LOCATION"),
                             server = extractHeader(response, "SERVER")
                         ))
                     }
-                } catch (_: SocketTimeoutException) { break }
+                } catch (_: SocketTimeoutException) {
+                    Log.d(TAG, "SSDP listening timed out, got $count Samsung responses")
+                    break
+                }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "SSDP error: ${e.message}")
+            Log.e(TAG, "SSDP error: ${e.message}", e)
         } finally {
+            try {
+                if (multicastLock?.isHeld == true) multicastLock.release()
+            } catch (_: Exception) {}
             try { sock.close() } catch (_: Exception) {}
         }
 
@@ -74,7 +93,15 @@ class SsdpDiscovery {
         val userAgent = extractHeader(response, "USER-AGENT")
         val containsSamsung = server?.uppercase()?.contains("SAMSUNG") == true ||
                 userAgent?.uppercase()?.contains("SAMSUNG") == true
-        if (!containsSamsung) return false
+        if (!containsSamsung) {
+            val st = extractHeader(response, "ST")
+            val location = extractHeader(response, "LOCATION")
+            if (st?.contains(SEARCH_TARGET, ignoreCase = true) == true) {
+                Log.d(TAG, "Samsung device found via ST match (no Samsung in headers): $location")
+                return true
+            }
+            return false
+        }
         val st = extractHeader(response, "ST")
         return st == null || st.contains(SEARCH_TARGET, ignoreCase = true)
     }

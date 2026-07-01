@@ -15,6 +15,11 @@ class TvApiClient {
             conn = URL("http://$ip:8001/api/v2/").openConnection() as HttpURLConnection
             conn.connectTimeout = 3000
             conn.readTimeout = 3000
+            val responseCode = conn.responseCode
+            if (responseCode != 200) {
+                Log.w(TAG, "GET $ip/api/v2/ returned HTTP $responseCode")
+                return null
+            }
             val response = conn.inputStream.bufferedReader().use { it.readText() }
 
             val json = JSONObject(response)
@@ -28,6 +33,8 @@ class TvApiClient {
             val parseVersion = device?.optString("version", "") ?: ""
             val mac = wifiMac.ifEmpty { id }
 
+            Log.i(TAG, "Found device: $name @ $ip (MAC: $mac, model: $modelName)")
+
             DeviceInfo(
                 id = mac.ifEmpty { ip },
                 name = name,
@@ -38,7 +45,7 @@ class TvApiClient {
                 port = 8001
             )
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to get device info from $ip: ${e.message}")
+            Log.d(TAG, "No device at $ip:8001 — ${e.message}")
             null
         } finally {
             try { conn?.disconnect() } catch (_: Exception) {}

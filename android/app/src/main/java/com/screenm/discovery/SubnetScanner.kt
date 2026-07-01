@@ -1,5 +1,6 @@
 package com.screenm.discovery
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -19,7 +20,12 @@ class SubnetScanner {
     private val concurrencyLimit = Semaphore(50)
 
     suspend fun scan(timeoutMs: Long = 10_000): List<ScanResult> = coroutineScope {
-        val baseIp = getBaseIp() ?: return@coroutineScope emptyList()
+        val baseIp = getBaseIp()
+        if (baseIp == null) {
+            Log.w(TAG, "Could not determine local network base IP — subnet scan skipped")
+            return@coroutineScope emptyList()
+        }
+        Log.i(TAG, "Starting subnet scan on $baseIp/24 (ports: 8001, 8002)")
         val prefix = baseIp.substringBeforeLast('.') + "."
         val ports = listOf(8001, 8002)
 
@@ -37,7 +43,10 @@ class SubnetScanner {
                             }
                         } catch (_: Exception) { false }
                     }
-                    if (openPorts.isNotEmpty()) ScanResult(ip, openPorts) else null
+                    if (openPorts.isNotEmpty()) {
+                        Log.d(TAG, "Open port(s) at $ip: $openPorts")
+                        ScanResult(ip, openPorts)
+                    } else null
                 }
             }
         }
@@ -47,24 +56,32 @@ class SubnetScanner {
                 deferred.awaitAll().filterNotNull()
             }
         } catch (_: Exception) {
-            deferred.filter { it.isCompleted }.mapNotNull {
+            val completed = deferred.filter { it.isCompleted }.mapNotNull {
                 try { it.getCompleted() } catch (_: Exception) { null }
             }
+            Log.w(TAG, "Subnet scan timed out after ${completed.size} completed checks")
+            completed
         }
     }
 
     private fun getBaseIp(): String? {
         try {
             NetworkInterface.getNetworkInterfaces()?.asSequence()?.forEach { ni ->
+                Log.d(TAG, "Checking interface: ${ni.name} (up=${ni.isUp}, loopback=${ni.isLoopback})")
                 if (ni.isLoopback || !ni.isUp) return@forEach
                 ni.inetAddresses?.asSequence()?.forEach { addr ->
                     if (addr is Inet4Address && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
                         val ip = addr.hostAddress ?: return@forEach
+                        Log.i(TAG, "Local IP: $ip on ${ni.name}")
                         return ip.substringBeforeLast('.') + ".0"
                     }
                 }
             }
         } catch (_: Exception) {}
         return null
+    }
+
+    companion object {
+        private const val TAG = "SubnetScanner"
     }
 }
