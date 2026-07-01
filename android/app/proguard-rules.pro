@@ -1,0 +1,3 @@
+-keep class org.webrtc.** { *; }
+-keep class org.java_websocket.** { *; }
+-keep class javax.jmdns.** { *; }
