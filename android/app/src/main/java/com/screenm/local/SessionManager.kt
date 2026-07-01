@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.screenm.ScreenCaptureService
+import com.screenm.discovery.TvApiClient
 import com.screenm.model.ConnectionState
+import com.screenm.model.DeviceInfo
 import com.screenm.signaling.LocalSignalingServer
+import com.screenm.signaling.SignalingMessage
 import com.screenm.webrtc.WebRTCClient
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,17 +23,18 @@ import org.webrtc.SessionDescription
 class SessionManager(private val context: Context) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
     private val signalingServer = LocalSignalingServer()
+    private val apiClient = TvApiClient()
     private val webRtcClient = WebRTCClient(context)
-
-    private val _connectionState = MutableStateFlow(ConnectionState.IDLE)
-    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private var signalingJob: Job? = null
     private var isStopping = false
 
-    fun startSession(mediaProjection: Intent, targetIp: String) {
+    private val _connectionState = MutableStateFlow(ConnectionState.IDLE)
+    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+
+    fun startSession(mediaProjection: Intent, device: DeviceInfo) {
+        if (isStopping) return
         _connectionState.value = ConnectionState.CONNECTING
         broadcastState(ConnectionState.CONNECTING)
 
@@ -49,9 +53,18 @@ class SessionManager(private val context: Context) {
                     return@launch
                 }
 
+                // Launch Tizen app via REST API with Android IP
+                val launched = apiClient.launchApp(device.ipAddress, TIZEN_APP_ID, JSONObject().apply {
+                    put("serverIp", localIp)
+                    put("serverPort", 8080)
+                })
+                if (!launched) {
+                    Log.w(TAG, "REST launch failed, TV app may need manual launch")
+                }
+
                 // Wait for TV to connect to our WebSocket
                 withTimeout(30_000L) {
-                    signalingServer.tvConnected.first { connected -> connected }
+                    signalingServer.tvConnected.first { c -> c }
                 }
 
                 webRtcClient.createPeerConnection(
@@ -72,13 +85,6 @@ class SessionManager(private val context: Context) {
 
                 webRtcClient.startScreenCapture(mediaProjection)
 
-                // Tell TV our IP so it can start the WebRTC flow
-                signalingServer.send("start", JSONObject().apply {
-                    put("serverIp", localIp)
-                    put("serverPort", 8080)
-                })
-
-                // Collect signaling messages in background
                 signalingJob = launch { collectSignaling() }
 
                 // Monitor WebRTC connection state
@@ -97,7 +103,6 @@ class SessionManager(private val context: Context) {
                     }
                 }
 
-                // Create the SDP offer
                 webRtcClient.createOffer()
             } catch (e: TimeoutCancellationException) {
                 failWith("TV connection timeout")
@@ -109,6 +114,7 @@ class SessionManager(private val context: Context) {
     }
 
     private fun failWith(message: String?) {
+        if (isStopping) return
         _connectionState.value = ConnectionState.ERROR
         broadcastState(ConnectionState.ERROR, message ?: "Unknown error")
         stopSession()
@@ -126,17 +132,24 @@ class SessionManager(private val context: Context) {
     }
 
     private fun handleSdpAnswer(data: JSONObject?) {
-        val type = data?.optString("type") ?: return
-        val sdp = data.optString("sdp") ?: return
-        webRtcClient.handleRemoteSdp(
-            SessionDescription(SessionDescription.Type.fromCanonicalForm(type), sdp)
-        )
+        if (data == null) return
+        val type = data.optString("type", "")
+        val sdp = data.optString("sdp", "")
+        if (type.isEmpty() || sdp.isEmpty()) return
+        try {
+            webRtcClient.handleRemoteSdp(
+                SessionDescription(SessionDescription.Type.fromCanonicalForm(type), sdp)
+            )
+        } catch (_: IllegalArgumentException) {
+            Log.w(TAG, "Invalid SDP type: $type")
+        }
     }
 
     private fun handleIceCandidate(data: JSONObject?) {
-        val sdpMid = data?.optString("sdpMid") ?: return
-        val sdpMLineIndex = data.optInt("sdpMLineIndex")
-        val candidate = data.optString("candidate") ?: return
+        val sdpMid = data?.optString("sdpMid", "") ?: return
+        val sdpMLineIndex = data.optInt("sdpMLineIndex", 0)
+        val candidate = data.optString("candidate", "") ?: return
+        if (candidate.isEmpty()) return
         webRtcClient.addIceCandidate(IceCandidate(sdpMid, sdpMLineIndex, candidate))
     }
 
@@ -162,11 +175,12 @@ class SessionManager(private val context: Context) {
     }
 
     fun destroy() {
-        scope.cancel()
         stopSession()
+        scope.cancel()
     }
 
     companion object {
         private const val TAG = "SessionManager"
+        private const val TIZEN_APP_ID = "screenm.Receiver"
     }
 }

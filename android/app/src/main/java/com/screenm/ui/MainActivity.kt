@@ -125,8 +125,11 @@ class MainActivity : ComponentActivity() {
             mediaProjectionIntent?.let {
                 putExtra(ScreenCaptureService.EXTRA_MEDIA_PROJECTION, it)
             }
-            pendingTargetDevice?.let {
-                putExtra(ScreenCaptureService.EXTRA_TARGET_IP, it.ipAddress)
+            pendingTargetDevice?.let { device ->
+                putExtra(ScreenCaptureService.EXTRA_TARGET_IP, device.ipAddress)
+                putExtra(ScreenCaptureService.EXTRA_TARGET_MAC, device.macAddress)
+                putExtra(ScreenCaptureService.EXTRA_TARGET_PORT, device.port)
+                putExtra(ScreenCaptureService.EXTRA_TARGET_NAME, device.name)
             }
         }
         startForegroundService(intent)
@@ -290,18 +293,16 @@ private fun DeviceCard(device: DeviceInfo, onSelect: () -> Unit) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = if (device.tizenVersion.isNotEmpty()) "Tizen ${device.tizenVersion}"
-                           else device.ipAddress,
+                    text = device.ipAddress,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             }
             Text(
-                text = if (device.isGoogleCastCapable) "Cast" else "WebRTC",
+                text = "TV",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (device.isGoogleCastCapable) Color(0xFF4CAF50)
-                        else MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

@@ -3,7 +3,11 @@ package com.screenm.signaling
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withContext
 import org.java_websocket.WebSocket
 import org.java_websocket.handshake.ClientHandshake
@@ -35,6 +39,9 @@ class LocalSignalingServer(private val port: Int = 8080) {
             server = object : WebSocketServer(InetSocketAddress(port)) {
                 override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
                     Log.i(TAG, "TV connected: ${conn.remoteSocketAddress}")
+                    if (tvConnection != null) {
+                        tvConnection?.close()
+                    }
                     tvConnection = conn
                     _tvConnected.value = true
                 }
@@ -102,12 +109,8 @@ class LocalSignalingServer(private val port: Int = 8080) {
                 for (addr in addresses) {
                     if (addr is Inet4Address && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
                         val ip = addr.hostAddress
-                        if (ip != null && ip.startsWith("192.168.")) {
-                            return ip
-                        }
-                        if (candidate == null) {
-                            candidate = ip
-                        }
+                        if (ip != null && ip.startsWith("192.168.")) return ip
+                        if (candidate == null) candidate = ip
                     }
                 }
             }

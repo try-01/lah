@@ -10,6 +10,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.screenm.local.SessionManager
+import com.screenm.model.DeviceInfo
 
 class ScreenCaptureService : Service() {
 
@@ -26,9 +27,7 @@ class ScreenCaptureService : Service() {
         when (intent?.action) {
             ACTION_START -> handleStart(intent)
             ACTION_STOP -> handleStop()
-        }
-        if (intent == null) {
-            stopSelf()
+            null -> stopSelf()
         }
         return START_NOT_STICKY
     }
@@ -52,7 +51,15 @@ class ScreenCaptureService : Service() {
             return
         }
 
-        sessionManager.startSession(mediaProjectionIntent, targetIp)
+        val device = DeviceInfo(
+            id = intent.getStringExtra(EXTRA_TARGET_MAC) ?: targetIp,
+            name = intent.getStringExtra(EXTRA_TARGET_NAME) ?: "Samsung TV",
+            ipAddress = targetIp,
+            macAddress = intent.getStringExtra(EXTRA_TARGET_MAC) ?: "",
+            port = intent.getIntExtra(EXTRA_TARGET_PORT, 8001)
+        )
+
+        sessionManager.startSession(mediaProjectionIntent, device)
     }
 
     private fun handleStop() {
@@ -99,6 +106,9 @@ class ScreenCaptureService : Service() {
         const val ACTION_STOP = "com.screenm.action.STOP"
         const val EXTRA_MEDIA_PROJECTION = "media_projection"
         const val EXTRA_TARGET_IP = "target_ip"
+        const val EXTRA_TARGET_MAC = "target_mac"
+        const val EXTRA_TARGET_PORT = "target_port"
+        const val EXTRA_TARGET_NAME = "target_name"
         const val BROADCAST_STATE = "com.screenm.state.CHANGED"
 
         private const val CHANNEL_ID = "screen_mirroring"
