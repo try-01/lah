@@ -20,7 +20,8 @@
         android:icon="@mipmap/ic_launcher"
         android:label="screenM"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ScreenM">
+        android:theme="@style/Theme.ScreenM"
+        android:networkSecurityConfig="@xml/network_security_config">
 
         <activity
             android:name=".ui.MainActivity"
