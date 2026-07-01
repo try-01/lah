@@ -1,0 +1,51 @@
+# Konfigurasi dasar detekt
+config:
+  validation: true       # Memeriksa apakah format YAML Anda sudah benar
+  warningsAsErrors: false
+
+# Aturan global untuk hasil build
+build:
+  maxIssues: 10          # Build gradle akan gagal (fail) jika ditemukan lebih dari 10 issue
+
+# Mengabaikan folder tertentu secara global dari analisis Detekt
+# (Detekt default-nya sudah mengabaikan folder build, namun baris ini memperjelas)
+processors:
+  active: true
+  exclude:
+    - '**/build/**'
+    - '**/resources/**'
+
+# === OVERRIDE ATURAN ===
+# Di bawah ini adalah contoh cara mengubah beberapa aturan default yang sering disesuaikan di proyek Android:
+
+complexity:
+  # Secara default, Detekt membatasi maksimal 11 fungsi dalam satu file.
+  # Di sini kita longgarkan menjadi maksimal 20 fungsi.
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+
+  # Mengatur batas maksimal parameter pada sebuah fungsi
+  LongParameterList:
+    active: true
+    functionThreshold: 8      # Default biasanya 6
+    constructorThreshold: 10  # Default biasanya 7
+
+naming:
+  # Mengabaikan aturan penamaan Class khusus untuk folder testing
+  ClassNaming:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/testData/**']
+
+style:
+  # Jika Anda tidak ingin Detekt memaksa penggunaan 'return' secara eksplisit
+  ReturnCount:
+    active: true
+    max: 4                    # Mengizinkan maksimal 4 pernyataan return dalam satu fungsi (default: 2)
+
+comments:
+  # Menonaktifkan peringatan jika fungsi public tidak memiliki dokumentasi (KDoc)
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
