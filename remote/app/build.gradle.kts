@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.process)
     implementation(libs.okhttp)
     implementation(libs.datastore)
     implementation(libs.coroutines.core)
