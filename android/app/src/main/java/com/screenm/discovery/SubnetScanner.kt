@@ -66,17 +66,28 @@ class SubnetScanner {
 
     private fun getBaseIp(): String? {
         try {
+            val candidates = mutableListOf<Pair<String, String>>() // (name, subnet)
             NetworkInterface.getNetworkInterfaces()?.asSequence()?.forEach { ni ->
                 Log.d(TAG, "Checking interface: ${ni.name} (up=${ni.isUp}, loopback=${ni.isLoopback})")
                 if (ni.isLoopback || !ni.isUp) return@forEach
+                // Skip hotspot/tethering/P2P interfaces — not the WiFi we want
+                if (ni.name.startsWith("ap") || ni.name.startsWith("p2p") || ni.name.startsWith("pan")) {
+                    Log.d(TAG, "Skipping ${ni.name} (hotspot/tethering)")
+                    return@forEach
+                }
                 ni.inetAddresses?.asSequence()?.forEach { addr ->
                     if (addr is Inet4Address && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
                         val ip = addr.hostAddress ?: return@forEach
                         Log.i(TAG, "Local IP: $ip on ${ni.name}")
-                        return ip.substringBeforeLast('.') + ".0"
+                        candidates.add(ni.name to ip.substringBeforeLast('.') + ".0")
                     }
                 }
             }
+            // Prefer wlan interface; fall back to first candidate
+            val preferred = candidates.firstOrNull { (name, _) -> name.startsWith("wlan") }
+                ?: candidates.firstOrNull()
+            preferred?.let { Log.i(TAG, "Selected interface ${it.first} — ${it.second}") }
+            return preferred?.second
         } catch (_: Exception) {}
         return null
     }
