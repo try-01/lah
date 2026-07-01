@@ -35,9 +35,9 @@ jobs:
         # Menambahkan prefix :app: agar build lebih terarah pada modul aplikasi utama
         run: |
           if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.ref }}" = "refs/heads/master" ]; then
-            ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease --no-daemon --parallel --build-cache --configure-on-demand
+            ./gradlew :app:testDebugUnitTest assembleDebug assembleRelease --no-daemon --parallel --build-cache --configure-on-demand
           else
-            ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon --parallel --build-cache --configure-on-demand
+            ./gradlew :app:testDebugUnitTest assembleDebug --no-daemon --parallel --build-cache --configure-on-demand
           fi
         shell: bash
 
