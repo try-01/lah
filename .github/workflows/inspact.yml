@@ -1,0 +1,96 @@
+name: Android Comprehensive Inspection android
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: ./android
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Mengambil kode dari repositori (Menggunakan sparse-checkout untuk folder android)
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          android
+
+    # 2. Mengonfigurasi Java JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    # 3. Mengonfigurasi Gradle Action Resmi (Mengoptimalkan cache secara otomatis di seluruh folder)
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    # 4. Memberikan izin eksekusi pada Gradle wrapper
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # 5. Menjalankan Unit Test
+    - name: Run Unit Tests
+      id: step_tests
+      run: ./gradlew :app:testDebugUnitTest
+      continue-on-error: true
+
+    # 6. Menjalankan Android Lint
+    - name: Run Android Lint
+      id: step_lint
+      run: ./gradlew :app:lintDebug
+      continue-on-error: true
+
+    # 7. OTOMATISASI KTLINT: Menjalankan perapian format kode otomatis
+    - name: Run Ktlint Format
+      run: ./gradlew :app:ktlintFormat
+      continue-on-error: true
+
+    # 8. OTOMATISASI KTLINT: Melakukan komit dan push jika ada perubahan format
+    - name: Commit formatted code
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "style: auto-format code with ktlintFormat"
+        file_pattern: 'android/**'
+
+    # 9. Verifikasi ulang Ktlint Check pasca-format
+    - name: Run Ktlint Check
+      id: step_ktlint
+      run: ./gradlew :app:ktlintCheck
+      continue-on-error: true
+
+    # 10. Menjalankan Detekt Static Analysis
+    - name: Run Detekt Static Analysis
+      id: step_detekt
+      run: ./gradlew :app:detektDebug
+      continue-on-error: true
+
+    # 11. Mengunggah semua laporan (HTML/XML) ke artifact
+    - name: Upload All Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-inspection-reports
+        path: |
+          android/**/build/reports/
+
+    # 12. Cek status akhir alur kerja (Memastikan workflow gagal jika ada inspeksi yang gagal)
+    - name: Check Inspection Status
+      if: always()
+      run: |
+        if [ "${{ steps.step_tests.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_lint.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_ktlint.outcome }}" = "failure" ] || \
+           [ "${{ steps.step_detekt.outcome }}" = "failure" ]; then
+          echo "Satu atau lebih inspeksi mendeteksi adanya error!"
+          exit 1
+        fi
+        
