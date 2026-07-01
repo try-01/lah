@@ -161,13 +161,14 @@ fun RemoteScreen(
 
     DisposableEffect(Unit) {
         val lifecycle = ProcessLifecycleOwner.get().lifecycle
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_STOP -> viewModel.disconnect()
-                Lifecycle.Event.ON_START -> viewModel.connect()
-                else -> {}
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_STOP -> viewModel.disconnect()
+                    Lifecycle.Event.ON_START -> viewModel.connect()
+                    else -> {}
+                }
             }
-        }
         lifecycle.addObserver(observer)
         onDispose {
             lifecycle.removeObserver(observer)
