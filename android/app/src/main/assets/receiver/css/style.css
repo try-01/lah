@@ -1,0 +1,111 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Samsung One', 'TizenSans', 'Malgun Gothic', sans-serif;
+    color: #fff;
+}
+
+#mirror-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#remote-video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #000;
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 10;
+}
+
+#overlay.hidden {
+    display: none;
+}
+
+#overlay .title {
+    font-size: 36px;
+    font-weight: 300;
+    margin-bottom: 24px;
+    color: #fff;
+}
+
+#overlay .subtitle {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 12px;
+}
+
+#overlay .status {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 24px;
+}
+
+#overlay .status.connecting {
+    color: #6C63FF;
+}
+
+#overlay .status.connected {
+    color: #4CAF50;
+}
+
+#overlay .status.error {
+    color: #E53935;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(108, 99, 255, 0.2);
+    border-top-color: #6C63FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#info-bar {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+    text-align: center;
+}
+
+#info-bar.hidden {
+    display: none;
+}

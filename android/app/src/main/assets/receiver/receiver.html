@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>screenM Receiver</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="mirror-container">
+        <video id="remote-video" autoplay playsinline></video>
+        <div id="overlay">
+            <div id="spinner" class="spinner"></div>
+            <div class="title">screenM</div>
+            <div class="subtitle">Screen Mirroring Receiver</div>
+            <div id="status-icon" class="status">
+                <span id="status-text">Initializing...</span>
+            </div>
+        </div>
+        <div id="info-bar" class="hidden">
+            <span id="info-text"></span>
+        </div>
+    </div>
+    <script src="js/signaling.js"></script>
+    <script src="js/webrtc_handler.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

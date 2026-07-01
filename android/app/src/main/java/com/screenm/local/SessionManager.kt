@@ -24,6 +24,7 @@ class SessionManager(private val context: Context) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val signalingServer = LocalSignalingServer()
+    private val httpServer = LocalHttpServer(context)
     private val apiClient = TvApiClient()
     private val webRtcClient = WebRTCClient(context)
 
@@ -42,30 +43,44 @@ class SessionManager(private val context: Context) {
             try {
                 webRtcClient.initialize()
 
-                val serverStarted = signalingServer.start()
-                if (!serverStarted) {
+                val wsStarted = signalingServer.start()
+                if (!wsStarted) {
                     failWith("Failed to start signaling server")
                     return@launch
                 }
 
-                val localIp = signalingServer.localIp ?: run {
+                val httpStarted = httpServer.start()
+                if (!httpStarted) {
+                    failWith("Failed to start HTTP server")
+                    return@launch
+                }
+
+                val localIp = httpServer.localIp ?: signalingServer.localIp ?: run {
                     failWith("No network IP found")
                     return@launch
                 }
 
-                // Launch Tizen app via REST API with Android IP
-                val launched = apiClient.launchApp(device.ipAddress, TIZEN_APP_ID, JSONObject().apply {
-                    put("serverIp", localIp)
-                    put("serverPort", 8080)
-                })
+                val httpPort = 8081
+                val wsPort = 8080
+                val receiverUrl = "http://$localIp:$httpPort/receiver.html?serverIp=$localIp&port=$wsPort"
+
+                // Launch TV browser to open the receiver page
+                val launched = launchBrowser(device.ipAddress, receiverUrl)
                 if (!launched) {
-                    Log.w(TAG, "REST launch failed, TV app may need manual launch")
+                    Log.w(TAG, "Browser launch failed — trying alternative app IDs")
+                    val altLaunched = launchBrowserAlt(device.ipAddress, receiverUrl)
+                    if (!altLaunched) {
+                        failWith("Failed to launch browser on TV — open browser manually to:\n$receiverUrl")
+                        return@launch
+                    }
                 }
 
                 // Wait for TV to connect to our WebSocket
+                Log.i(TAG, "Waiting for TV to connect to WS...")
                 withTimeout(30_000L) {
                     signalingServer.tvConnected.first { c -> c }
                 }
+                Log.i(TAG, "TV connected to WS!")
 
                 webRtcClient.createPeerConnection(
                     onIceCandidate = { candidate ->
@@ -87,7 +102,6 @@ class SessionManager(private val context: Context) {
 
                 signalingJob = launch { collectSignaling() }
 
-                // Monitor WebRTC connection state
                 launch {
                     webRtcClient.connectionState.collect { state ->
                         when (state) {
@@ -111,6 +125,19 @@ class SessionManager(private val context: Context) {
                 failWith(e.message)
             }
         }
+    }
+
+    private fun launchBrowser(ip: String, url: String): Boolean {
+        return apiClient.launchApp(ip, "org.tizen.browser", url)
+    }
+
+    private fun launchBrowserAlt(ip: String, url: String): Boolean {
+        val altIds = listOf("com.samsung.app.internet", "org.tizen.tizenbrowser")
+        for (appId in altIds) {
+            val ok = apiClient.launchApp(ip, appId, url)
+            if (ok) return true
+        }
+        return false
     }
 
     private fun failWith(message: String?) {
@@ -161,6 +188,7 @@ class SessionManager(private val context: Context) {
         scope.coroutineContext.cancelChildren()
         webRtcClient.stop()
         signalingServer.stop()
+        httpServer.stop()
         _connectionState.value = ConnectionState.IDLE
         broadcastState(ConnectionState.IDLE)
         isStopping = false
@@ -181,6 +209,5 @@ class SessionManager(private val context: Context) {
 
     companion object {
         private const val TAG = "SessionManager"
-        private const val TIZEN_APP_ID = "screenm.Receiver"
     }
 }

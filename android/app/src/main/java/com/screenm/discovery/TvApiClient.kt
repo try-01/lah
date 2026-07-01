@@ -52,27 +52,34 @@ class TvApiClient {
         }
     }
 
-    fun launchApp(ip: String, appId: String, metaTag: JSONObject? = null): Boolean {
+    fun launchApp(ip: String, appId: String, metaTag: String? = null): Boolean {
         return try {
             val url = URL("http://$ip:8001/api/v2/applications/$appId")
             val conn = url.openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.connectTimeout = 3000
-            conn.readTimeout = 3000
+            conn.readTimeout = 5000
             conn.setRequestProperty("Content-Type", "application/json")
 
             val body = JSONObject().apply {
                 put("appId", appId)
-                put("action_type", "DEEP_LINK")
                 if (metaTag != null) {
-                    put("meta_tag", metaTag.toString())
+                    put("meta_tag", metaTag)
                 }
             }
-            OutputStreamWriter(conn.outputStream).use { it.write(body.toString()) }
+            val bodyStr = body.toString()
+            Log.d(TAG, "POST $ip/api/v2/applications/$appId body=$bodyStr")
+            OutputStreamWriter(conn.outputStream).use { it.write(bodyStr) }
 
             val code = conn.responseCode
+            val responseBody = try {
+                conn.inputStream.bufferedReader().use { it.readText() }
+            } catch (_: Exception) {
+                try { conn.errorStream?.bufferedReader()?.readText() } catch (_: Exception) { null }
+            }
             conn.disconnect()
+            Log.i(TAG, "Launch app response: HTTP $code — $responseBody")
             code in 200..299
         } catch (e: Exception) {
             Log.w(TAG, "Failed to launch app $appId on $ip: ${e.message}")
