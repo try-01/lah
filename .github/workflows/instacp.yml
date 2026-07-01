@@ -1,15 +1,12 @@
 name: Android Comprehensive Inspection
 
 on:
-  # 1. Pemicu Manual: Tidak akan build otomatis saat edit file.
-  # Action hanya akan berjalan jika Anda menekan tombol "Run workflow" di tab Actions GitHub.
   workflow_dispatch:
 
 defaults:
   run:
     working-directory: ./remote
 
-# Memberikan izin menulis pada repositori agar GitHub Actions bisa mengunggah hasil format otomatis
 permissions:
   contents: write
 
@@ -18,9 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Mengambil kode dari repositori
+    # 1. Mengambil kode dari repositori (Menggunakan sparse-checkout untuk folder remote)
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          remote
 
     # 2. Mengonfigurasi Java JDK 17
     - name: Set up JDK 17
@@ -28,57 +28,61 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: '17'
-        cache: 'gradle'
 
-    # 3. Memberikan izin eksekusi pada Gradle wrapper
+    # 3. Mengonfigurasi Gradle Action Resmi (Mengoptimalkan cache secara otomatis di seluruh folder)
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    # 4. Memberikan izin eksekusi pada Gradle wrapper
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    # 4. Menjalankan Unit Test
+    # 5. Menjalankan Unit Test
     - name: Run Unit Tests
       id: step_tests
       run: ./gradlew :app:testDebugUnitTest
       continue-on-error: true
 
-    # 5. Menjalankan Android Lint
+    # 6. Menjalankan Android Lint
     - name: Run Android Lint
       id: step_lint
       run: ./gradlew :app:lintDebug
       continue-on-error: true
 
-    # 6. OTOMATISASI KTLINT: Menjalankan perapian format kode otomatis
+    # 7. OTOMATISASI KTLINT: Menjalankan perapian format kode otomatis
     - name: Run Ktlint Format
       run: ./gradlew :app:ktlintFormat
       continue-on-error: true
 
-    # 7. OTOMATISASI KTLINT: Melakukan komit dan push jika ada perubahan format
+    # 8. OTOMATISASI KTLINT: Melakukan komit dan push jika ada perubahan format
     - name: Commit formatted code
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
         commit_message: "style: auto-format code with ktlintFormat"
+        file_pattern: 'remote/**'
 
-    # 8. Verifikasi ulang Ktlint Check pasca-format
+    # 9. Verifikasi ulang Ktlint Check pasca-format
     - name: Run Ktlint Check
       id: step_ktlint
       run: ./gradlew :app:ktlintCheck
       continue-on-error: true
 
-    # 9. Menjalankan Detekt Static Analysis
+    # 10. Menjalankan Detekt Static Analysis
     - name: Run Detekt Static Analysis
       id: step_detekt
       run: ./gradlew :app:detektDebug
       continue-on-error: true
 
-    # 10. Mengunggah semua laporan (HTML/XML) ke artifact
+    # 11. Mengunggah semua laporan (HTML/XML) ke artifact
     - name: Upload All Reports
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: android-inspection-reports
         path: |
-          **/build/reports/
+          remote/**/build/reports/
 
-    # 11. Cek status akhir alur kerja
+    # 12. Cek status akhir alur kerja (Memastikan workflow gagal jika ada inspeksi yang gagal)
     - name: Check Inspection Status
       if: always()
       run: |
@@ -89,3 +93,4 @@ jobs:
           echo "Satu atau lebih inspeksi mendeteksi adanya error!"
           exit 1
         fi
+        
