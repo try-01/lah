@@ -62,7 +62,9 @@ class MainActivity : ComponentActivity() {
 
     private val stateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val state = intent.getStringExtra("state")?.let { ConnectionState.valueOf(it) }
+            val state = intent.getStringExtra("state")?.let { name ->
+                try { ConnectionState.valueOf(name) } catch (_: IllegalArgumentException) { null }
+            }
             if (state != null) {
                 connectionState = state
             }

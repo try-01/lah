@@ -54,7 +54,6 @@ class WebRTCClient(private val context: Context) {
             bundlePolicy = BundlePolicy.MAXBUNDLE
             rtcpMuxPolicy = RtcpMuxPolicy.REQUIRE
             continualGatheringPolicy = ContinualGatheringPolicy.GATHER_CONTINUALLY
-            keyType = KeyType.ECC
         }
 
         peerConnection = peerConnectionFactory?.createPeerConnection(config, object : Observer {
@@ -71,6 +70,7 @@ class WebRTCClient(private val context: Context) {
             override fun onIceConnectionChange(state: IceConnectionState) {
                 Log.i(TAG, "ICE: $state")
                 _connectionState.value = when (state) {
+                    IceConnectionState.NEW,
                     IceConnectionState.CHECKING -> State.CONNECTING
                     IceConnectionState.CONNECTED -> State.CONNECTED
                     IceConnectionState.COMPLETED -> State.CONNECTED
@@ -93,6 +93,7 @@ class WebRTCClient(private val context: Context) {
             override fun onRenegotiationNeeded() {}
 
             override fun onStandardizedIceConnectionChange(state: IceConnectionState) {}
+            override fun onIceConnectionReceivingChange(receiving: Boolean) {}
         })
     }
 

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
@@ -50,7 +51,7 @@ class SessionManager(private val context: Context) {
 
                 // Wait for TV to connect to our WebSocket
                 withTimeout(30_000L) {
-                    signalingServer.tvConnected.first { it }
+                    signalingServer.tvConnected.first { connected -> connected }
                 }
 
                 webRtcClient.createPeerConnection(

@@ -95,16 +95,15 @@ class LocalSignalingServer(private val port: Int = 8080) {
     private fun findLocalIp(): String? {
         try {
             var candidate: String? = null
-            NetworkInterface.getNetworkInterfaces()?.asSequence()?.forEach { network ->
-                if (network.isLoopback || !network.isUp) return@forEach
-
-                network.inetAddresses?.asSequence()?.forEach { addr ->
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return null
+            for (network in interfaces) {
+                if (network.isLoopback || !network.isUp) continue
+                val addresses = network.inetAddresses ?: continue
+                for (addr in addresses) {
                     if (addr is Inet4Address && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
                         val ip = addr.hostAddress
-                        // Prefer 192.168.x.x (typical WiFi) over other subnets
                         if (ip != null && ip.startsWith("192.168.")) {
-                            candidate = ip
-                            return@findLocalIp
+                            return ip
                         }
                         if (candidate == null) {
                             candidate = ip

@@ -27,7 +27,7 @@ class ScreenCaptureService : Service() {
             ACTION_START -> handleStart(intent)
             ACTION_STOP -> handleStop()
         }
-        if (intent == null && !::sessionManager.isInitialized) {
+        if (intent == null) {
             stopSelf()
         }
         return START_NOT_STICKY
