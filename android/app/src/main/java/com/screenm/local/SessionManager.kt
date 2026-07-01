@@ -60,24 +60,24 @@ class SessionManager(private val context: Context) {
                     return@launch
                 }
 
-                val httpPort = 8081
                 val wsPort = 8080
-                val receiverUrl = "http://$localIp:$httpPort/receiver.html?serverIp=$localIp&port=$wsPort"
+                val receiverUrl = "http://$localIp:8081/receiver.html?serverIp=$localIp&port=$wsPort"
 
-                // Launch TV browser to open the receiver page
-                val launched = launchBrowser(device.ipAddress, receiverUrl)
-                if (!launched) {
-                    Log.w(TAG, "Browser launch failed — trying alternative app IDs")
-                    val altLaunched = launchBrowserAlt(device.ipAddress, receiverUrl)
-                    if (!altLaunched) {
-                        failWith("Failed to launch browser on TV — open browser manually to:\n$receiverUrl")
-                        return@launch
-                    }
+                // Launch TV browser — try all possible methods
+                val launched = launchBrowserOnTv(device.ipAddress, receiverUrl)
+
+                if (launched) {
+                    Log.i(TAG, "Browser launched on TV. Waiting for WS connection...")
+                    Log.i(TAG, "If browser doesn't navigate automatically, open manually:\n$receiverUrl")
+                    // Broadcast the URL so Activity can show it
+                    broadcastUrl(receiverUrl)
+                } else {
+                    Log.w(TAG, "Could not launch browser automatically.\nOpen this URL on TV:\n$receiverUrl")
+                    broadcastUrl(receiverUrl)
                 }
 
                 // Wait for TV to connect to our WebSocket
-                Log.i(TAG, "Waiting for TV to connect to WS...")
-                withTimeout(30_000L) {
+                withTimeout(60_000L) {
                     signalingServer.tvConnected.first { c -> c }
                 }
                 Log.i(TAG, "TV connected to WS!")
@@ -119,7 +119,9 @@ class SessionManager(private val context: Context) {
 
                 webRtcClient.createOffer()
             } catch (e: TimeoutCancellationException) {
-                failWith("TV connection timeout")
+                failWith("Timeout — open browser on TV and navigate to:\n${
+                    "http://${httpServer.localIp ?: "192.168.123.40"}:8081"
+                }")
             } catch (e: Exception) {
                 Log.e(TAG, "Session error: ${e.message}", e)
                 failWith(e.message)
@@ -127,17 +129,46 @@ class SessionManager(private val context: Context) {
         }
     }
 
-    private fun launchBrowser(ip: String, url: String): Boolean {
-        return apiClient.launchApp(ip, "org.tizen.browser", url)
-    }
+    private suspend fun launchBrowserOnTv(ip: String, url: String): Boolean {
+        // Method 1: meta_tag with action_type DEEP_LINK (various formats)
+        val formats = listOf(
+            "url=$url",
+            url,
+            """{"url":"$url"}""",
+            "uri=$url"
+        )
 
-    private fun launchBrowserAlt(ip: String, url: String): Boolean {
-        val altIds = listOf("com.samsung.app.internet", "org.tizen.tizenbrowser")
-        for (appId in altIds) {
-            val ok = apiClient.launchApp(ip, appId, url)
-            if (ok) return true
+        val browserIds = listOf(
+            "org.tizen.browser",
+            "com.samsung.app.internet",
+            "org.tizen.tizenbrowser"
+        )
+
+        for (appId in browserIds) {
+            // Try each meta_tag format
+            for (metaTag in formats) {
+                val ok = apiClient.launchApp(ip, appId, metaTag)
+                if (ok) {
+                    Log.i(TAG, "Launched $appId with meta_tag=$metaTag")
+                    return true
+                }
+            }
+            // Try with uri as separate parameter
+            val ok = apiClient.launchAppWithUri(ip, appId, url)
+            if (ok) {
+                Log.i(TAG, "Launched $appId with uri=$url")
+                return true
+            }
         }
         return false
+    }
+
+    private fun broadcastUrl(url: String) {
+        val intent = Intent(ScreenCaptureService.BROADCAST_STATE).apply {
+            putExtra("state", ConnectionState.CONNECTING.name)
+            putExtra("url", url)
+        }
+        context.sendBroadcast(intent)
     }
 
     private fun failWith(message: String?) {

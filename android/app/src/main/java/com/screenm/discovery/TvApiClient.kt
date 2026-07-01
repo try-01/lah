@@ -6,6 +6,7 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
 
 class TvApiClient {
 
@@ -53,9 +54,9 @@ class TvApiClient {
     }
 
     fun launchApp(ip: String, appId: String, metaTag: String? = null): Boolean {
+        var conn: HttpURLConnection? = null
         return try {
-            val url = URL("http://$ip:8001/api/v2/applications/$appId")
-            val conn = url.openConnection() as HttpURLConnection
+            conn = URL("http://$ip:8001/api/v2/applications/$appId").openConnection() as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
             conn.connectTimeout = 3000
@@ -64,6 +65,7 @@ class TvApiClient {
 
             val body = JSONObject().apply {
                 put("appId", appId)
+                put("action_type", "DEEP_LINK")
                 if (metaTag != null) {
                     put("meta_tag", metaTag)
                 }
@@ -78,12 +80,47 @@ class TvApiClient {
             } catch (_: Exception) {
                 try { conn.errorStream?.bufferedReader()?.readText() } catch (_: Exception) { null }
             }
-            conn.disconnect()
             Log.i(TAG, "Launch app response: HTTP $code — $responseBody")
             code in 200..299
         } catch (e: Exception) {
             Log.w(TAG, "Failed to launch app $appId on $ip: ${e.message}")
             false
+        } finally {
+            try { conn?.disconnect() } catch (_: Exception) {}
+        }
+    }
+
+    fun launchAppWithUri(ip: String, appId: String, uri: String): Boolean {
+        var conn: HttpURLConnection? = null
+        return try {
+            val encodedUri = URLEncoder.encode(uri, "UTF-8")
+            val url = URL("http://$ip:8001/api/v2/applications/$appId?uri=$encodedUri")
+            conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.connectTimeout = 3000
+            conn.readTimeout = 5000
+            conn.setRequestProperty("Content-Type", "application/json")
+
+            val body = JSONObject().apply {
+                put("appId", appId)
+                put("action_type", "DEEP_LINK")
+                put("uri", uri)
+            }
+            val bodyStr = body.toString()
+            Log.d(TAG, "POST (uri) $ip/api/v2/applications/$appId body=$bodyStr")
+            OutputStreamWriter(conn.outputStream).use { it.write(bodyStr) }
+
+            val code = conn.responseCode
+            val ok = code in 200..299
+            if (ok) Log.i(TAG, "Launch (uri) success: HTTP $code")
+            else Log.w(TAG, "Launch (uri) returned HTTP $code")
+            ok
+        } catch (e: Exception) {
+            Log.w(TAG, "Launch (uri) failed for $appId on $ip: ${e.message}")
+            false
+        } finally {
+            try { conn?.disconnect() } catch (_: Exception) {}
         }
     }
 
