@@ -10,7 +10,6 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 class CryptoUtil {
-
     private val keyStore: KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
 
     private fun getOrCreateKey(): SecretKey {
@@ -23,7 +22,7 @@ class CryptoUtil {
                 .setBlockModes(BLOCK_MODE)
                 .setEncryptionPaddings(PADDING)
                 .setKeySize(256)
-                .build()
+                .build(),
         )
         return generator.generateKey()
     }
@@ -45,7 +44,9 @@ class CryptoUtil {
             val cipher = Cipher.getInstance(TRANSFORMATION)
             cipher.init(Cipher.DECRYPT_MODE, getOrCreateKey(), GCMParameterSpec(128, iv))
             String(cipher.doFinal(encrypted), Charsets.UTF_8)
-        } catch (_: Exception) { null }
+        } catch (_: Exception) {
+            null
+        }
     }
 
     companion object {

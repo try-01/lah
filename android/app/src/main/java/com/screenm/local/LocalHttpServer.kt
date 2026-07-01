@@ -9,20 +9,21 @@ import java.net.URLDecoder
 import java.util.concurrent.Executors
 
 class LocalHttpServer(private val context: Context, private val port: Int = 8081) {
-
     private var serverSocket: ServerSocket? = null
     private val executor = Executors.newCachedThreadPool()
+
     @Volatile private var isRunning = false
 
-    private val mimeTypes = mapOf(
-        ".html" to "text/html; charset=utf-8",
-        ".js" to "application/javascript; charset=utf-8",
-        ".css" to "text/css; charset=utf-8",
-        ".json" to "application/json",
-        ".png" to "image/png",
-        ".jpg" to "image/jpeg",
-        ".svg" to "image/svg+xml"
-    )
+    private val mimeTypes =
+        mapOf(
+            ".html" to "text/html; charset=utf-8",
+            ".js" to "application/javascript; charset=utf-8",
+            ".css" to "text/css; charset=utf-8",
+            ".json" to "application/json",
+            ".png" to "image/png",
+            ".jpg" to "image/jpeg",
+            ".svg" to "image/svg+xml",
+        )
 
     val localIp: String? by lazy { findLocalIp() }
 
@@ -46,7 +47,8 @@ class LocalHttpServer(private val context: Context, private val port: Int = 8081
                 val client = serverSocket?.accept() ?: break
                 executor.submit { handleClient(client) }
             }
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
     }
 
     private fun handleClient(client: Socket) {
@@ -55,10 +57,11 @@ class LocalHttpServer(private val context: Context, private val port: Int = 8081
                 val request = sock.getInputStream().bufferedReader().use { it.readLine() } ?: return
                 if (!request.startsWith("GET ")) return
 
-                val path = URLDecoder.decode(
-                    request.split(" ").getOrElse(1) { "/" },
-                    "UTF-8"
-                ).removePrefix("/").ifEmpty { "receiver.html" }
+                val path =
+                    URLDecoder.decode(
+                        request.split(" ").getOrElse(1) { "/" },
+                        "UTF-8",
+                    ).removePrefix("/").ifEmpty { "receiver.html" }
 
                 val ext = path.substringAfterLast('.', "")
                 val contentType = mimeTypes[".$ext"] ?: "application/octet-stream"
@@ -88,8 +91,14 @@ class LocalHttpServer(private val context: Context, private val port: Int = 8081
         }
     }
 
-    private fun sendResponse(out: OutputStream, status: String, contentType: String, data: ByteArray) {
-        val headers = "HTTP/1.1 $status\r\n" +
+    private fun sendResponse(
+        out: OutputStream,
+        status: String,
+        contentType: String,
+        data: ByteArray,
+    ) {
+        val headers =
+            "HTTP/1.1 $status\r\n" +
                 "Content-Type: $contentType\r\n" +
                 "Content-Length: ${data.size}\r\n" +
                 "Connection: close\r\n" +
@@ -102,7 +111,10 @@ class LocalHttpServer(private val context: Context, private val port: Int = 8081
 
     fun stop() {
         isRunning = false
-        try { serverSocket?.close() } catch (_: Exception) {}
+        try {
+            serverSocket?.close()
+        } catch (_: Exception) {
+        }
         serverSocket = null
         executor.shutdownNow()
     }
@@ -122,7 +134,8 @@ class LocalHttpServer(private val context: Context, private val port: Int = 8081
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         return null
     }
 

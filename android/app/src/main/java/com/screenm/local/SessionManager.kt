@@ -8,7 +8,6 @@ import com.screenm.discovery.TvApiClient
 import com.screenm.model.ConnectionState
 import com.screenm.model.DeviceInfo
 import com.screenm.signaling.LocalSignalingServer
-import com.screenm.signaling.SignalingMessage
 import com.screenm.webrtc.WebRTCClient
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +20,6 @@ import org.webrtc.IceCandidate
 import org.webrtc.SessionDescription
 
 class SessionManager(private val context: Context) {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val signalingServer = LocalSignalingServer()
     private val httpServer = LocalHttpServer(context)
@@ -34,7 +32,10 @@ class SessionManager(private val context: Context) {
     private val _connectionState = MutableStateFlow(ConnectionState.IDLE)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    fun startSession(mediaProjection: Intent, device: DeviceInfo) {
+    fun startSession(
+        mediaProjection: Intent,
+        device: DeviceInfo,
+    ) {
         if (isStopping) return
         _connectionState.value = ConnectionState.CONNECTING
         broadcastState(ConnectionState.CONNECTING)
@@ -55,10 +56,11 @@ class SessionManager(private val context: Context) {
                     return@launch
                 }
 
-                val localIp = httpServer.localIp ?: signalingServer.localIp ?: run {
-                    failWith("No network IP found")
-                    return@launch
-                }
+                val localIp =
+                    httpServer.localIp ?: signalingServer.localIp ?: run {
+                        failWith("No network IP found")
+                        return@launch
+                    }
 
                 val wsPort = 8080
                 val receiverUrl = "http://$localIp:8081/receiver.html?serverIp=$localIp&port=$wsPort"
@@ -84,18 +86,24 @@ class SessionManager(private val context: Context) {
 
                 webRtcClient.createPeerConnection(
                     onIceCandidate = { candidate ->
-                        signalingServer.send("ice_candidate", JSONObject().apply {
-                            put("sdpMid", candidate.sdpMid)
-                            put("sdpMLineIndex", candidate.sdpMLineIndex)
-                            put("candidate", candidate.sdp)
-                        })
+                        signalingServer.send(
+                            "ice_candidate",
+                            JSONObject().apply {
+                                put("sdpMid", candidate.sdpMid)
+                                put("sdpMLineIndex", candidate.sdpMLineIndex)
+                                put("candidate", candidate.sdp)
+                            },
+                        )
                     },
                     onSdpReady = { sdp ->
-                        signalingServer.send("sdp_offer", JSONObject().apply {
-                            put("type", sdp.type.canonicalForm())
-                            put("sdp", sdp.description)
-                        })
-                    }
+                        signalingServer.send(
+                            "sdp_offer",
+                            JSONObject().apply {
+                                put("type", sdp.type.canonicalForm())
+                                put("sdp", sdp.description)
+                            },
+                        )
+                    },
                 )
 
                 webRtcClient.startScreenCapture(mediaProjection)
@@ -119,9 +127,11 @@ class SessionManager(private val context: Context) {
 
                 webRtcClient.createOffer()
             } catch (e: TimeoutCancellationException) {
-                failWith("Timeout — open browser on TV and navigate to:\n${
-                    "http://${httpServer.localIp ?: "192.168.123.40"}:8081"
-                }")
+                failWith(
+                    "Timeout — open browser on TV and navigate to:\n${
+                        "http://${httpServer.localIp ?: "192.168.123.40"}:8081"
+                    }",
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "Session error: ${e.message}", e)
                 failWith(e.message)
@@ -129,20 +139,25 @@ class SessionManager(private val context: Context) {
         }
     }
 
-    private suspend fun launchBrowserOnTv(ip: String, url: String): Boolean {
+    private suspend fun launchBrowserOnTv(
+        ip: String,
+        url: String,
+    ): Boolean {
         // Method 1: meta_tag with action_type DEEP_LINK (various formats)
-        val formats = listOf(
-            "url=$url",
-            url,
-            """{"url":"$url"}""",
-            "uri=$url"
-        )
+        val formats =
+            listOf(
+                "url=$url",
+                url,
+                """{"url":"$url"}""",
+                "uri=$url",
+            )
 
-        val browserIds = listOf(
-            "org.tizen.browser",
-            "com.samsung.app.internet",
-            "org.tizen.tizenbrowser"
-        )
+        val browserIds =
+            listOf(
+                "org.tizen.browser",
+                "com.samsung.app.internet",
+                "org.tizen.tizenbrowser",
+            )
 
         for (appId in browserIds) {
             // Try each meta_tag format
@@ -164,10 +179,11 @@ class SessionManager(private val context: Context) {
     }
 
     private fun broadcastUrl(url: String) {
-        val intent = Intent(ScreenCaptureService.BROADCAST_STATE).apply {
-            putExtra("state", ConnectionState.CONNECTING.name)
-            putExtra("url", url)
-        }
+        val intent =
+            Intent(ScreenCaptureService.BROADCAST_STATE).apply {
+                putExtra("state", ConnectionState.CONNECTING.name)
+                putExtra("url", url)
+            }
         context.sendBroadcast(intent)
     }
 
@@ -196,7 +212,7 @@ class SessionManager(private val context: Context) {
         if (type.isEmpty() || sdp.isEmpty()) return
         try {
             webRtcClient.handleRemoteSdp(
-                SessionDescription(SessionDescription.Type.fromCanonicalForm(type), sdp)
+                SessionDescription(SessionDescription.Type.fromCanonicalForm(type), sdp),
             )
         } catch (_: IllegalArgumentException) {
             Log.w(TAG, "Invalid SDP type: $type")
@@ -225,11 +241,15 @@ class SessionManager(private val context: Context) {
         isStopping = false
     }
 
-    private fun broadcastState(state: ConnectionState, error: String? = null) {
-        val intent = Intent(ScreenCaptureService.BROADCAST_STATE).apply {
-            putExtra("state", state.name)
-            error?.let { putExtra("error", it) }
-        }
+    private fun broadcastState(
+        state: ConnectionState,
+        error: String? = null,
+    ) {
+        val intent =
+            Intent(ScreenCaptureService.BROADCAST_STATE).apply {
+                putExtra("state", state.name)
+                error?.let { putExtra("error", it) }
+            }
         context.sendBroadcast(intent)
     }
 

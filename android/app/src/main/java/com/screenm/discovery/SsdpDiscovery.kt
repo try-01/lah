@@ -11,7 +11,6 @@ import java.net.NetworkInterface
 import java.net.SocketTimeoutException
 
 class SsdpDiscovery(private val context: Context) {
-
     data class DiscoveredDevice(val ip: String, val location: String?, val server: String?)
 
     fun discover(timeoutMs: Long = 3000): List<DiscoveredDevice> {
@@ -34,10 +33,13 @@ class SsdpDiscovery(private val context: Context) {
             Log.i(TAG, "Sending M-SEARCH from ${networkIps.size} interfaces, target=$SEARCH_TARGET")
 
             for (localIp in networkIps) {
-                val packet = DatagramPacket(
-                    searchMessage, searchMessage.size,
-                    multicastGroup, MULTICAST_PORT
-                )
+                val packet =
+                    DatagramPacket(
+                        searchMessage,
+                        searchMessage.size,
+                        multicastGroup,
+                        MULTICAST_PORT,
+                    )
                 packet.address = multicastGroup
                 sock.send(packet)
                 Log.d(TAG, "M-SEARCH sent from ${localIp.hostAddress}")
@@ -55,11 +57,13 @@ class SsdpDiscovery(private val context: Context) {
                         val ip = receivePacket.address.hostAddress ?: continue
                         count++
                         Log.i(TAG, "SSDP response #$count from $ip")
-                        results.add(DiscoveredDevice(
-                            ip = ip,
-                            location = extractHeader(response, "LOCATION"),
-                            server = extractHeader(response, "SERVER")
-                        ))
+                        results.add(
+                            DiscoveredDevice(
+                                ip = ip,
+                                location = extractHeader(response, "LOCATION"),
+                                server = extractHeader(response, "SERVER"),
+                            ),
+                        )
                     }
                 } catch (_: SocketTimeoutException) {
                     Log.d(TAG, "SSDP listening timed out, got $count Samsung responses")
@@ -71,27 +75,34 @@ class SsdpDiscovery(private val context: Context) {
         } finally {
             try {
                 if (multicastLock?.isHeld == true) multicastLock.release()
-            } catch (_: Exception) {}
-            try { sock.close() } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
+            try {
+                sock.close()
+            } catch (_: Exception) {
+            }
         }
 
         return results.distinctBy { it.ip }
     }
 
     private fun buildMSearch(): ByteArray {
-        return ("M-SEARCH * HTTP/1.1\r\n" +
+        return (
+            "M-SEARCH * HTTP/1.1\r\n" +
                 "HOST: $MULTICAST_ADDR:$MULTICAST_PORT\r\n" +
                 "MAN: \"ssdp:discover\"\r\n" +
                 "MX: 2\r\n" +
                 "ST: $SEARCH_TARGET\r\n" +
                 "USER-AGENT: screenM/1.0 Android\r\n" +
-                "\r\n").toByteArray()
+                "\r\n"
+        ).toByteArray()
     }
 
     private fun isSamsungResponse(response: String): Boolean {
         val server = extractHeader(response, "SERVER")
         val userAgent = extractHeader(response, "USER-AGENT")
-        val containsSamsung = server?.uppercase()?.contains("SAMSUNG") == true ||
+        val containsSamsung =
+            server?.uppercase()?.contains("SAMSUNG") == true ||
                 userAgent?.uppercase()?.contains("SAMSUNG") == true
         if (!containsSamsung) {
             val st = extractHeader(response, "ST")
@@ -106,7 +117,10 @@ class SsdpDiscovery(private val context: Context) {
         return st == null || st.contains(SEARCH_TARGET, ignoreCase = true)
     }
 
-    private fun extractHeader(response: String, name: String): String? {
+    private fun extractHeader(
+        response: String,
+        name: String,
+    ): String? {
         val regex = Regex("$name:\\s*(.+)", RegexOption.IGNORE_CASE)
         return regex.find(response)?.groupValues?.getOrNull(1)?.trim()
     }
@@ -122,7 +136,8 @@ class SsdpDiscovery(private val context: Context) {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         return ips
     }
 

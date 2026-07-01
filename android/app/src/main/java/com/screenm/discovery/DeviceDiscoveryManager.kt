@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class DeviceDiscoveryManager(context: Context) {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val ssdpDiscovery = SsdpDiscovery(context)
     private val subnetScanner = SubnetScanner()
@@ -34,38 +33,42 @@ class DeviceDiscoveryManager(context: Context) {
         _devices.value = emptyList()
         Log.i(TAG, "Starting device discovery (SSDP + subnet scan)")
 
-        discoveryJob = scope.launch {
-            val ssdpDeferred = async {
-                val t0 = System.currentTimeMillis()
-                val results = ssdpDiscovery.discover(3000)
-                Log.i(TAG, "SSDP found ${results.size} devices in ${System.currentTimeMillis() - t0}ms: ${results.map { it.ip }}")
-                results
+        discoveryJob =
+            scope.launch {
+                val ssdpDeferred =
+                    async {
+                        val t0 = System.currentTimeMillis()
+                        val results = ssdpDiscovery.discover(3000)
+                        Log.i(TAG, "SSDP found ${results.size} devices in ${System.currentTimeMillis() - t0}ms: ${results.map { it.ip }}")
+                        results
+                    }
+                val subnetDeferred =
+                    async {
+                        val t0 = System.currentTimeMillis()
+                        val results = subnetScanner.scan(10_000)
+                        Log.i(TAG, "Subnet scan found ${results.size} devices in ${System.currentTimeMillis() - t0}ms: ${results.map { it.ip }}")
+                        results
+                    }
+
+                val ssdpResults = ssdpDeferred.await()
+                val subnetResults = subnetDeferred.await()
+
+                val allIps = mutableSetOf<String>()
+                ssdpResults.forEach { allIps.add(it.ip) }
+                subnetResults.forEach { allIps.add(it.ip) }
+                Log.i(TAG, "Total unique IPs to probe: ${allIps.size} — $allIps")
+
+                val devices =
+                    allIps.mapNotNull { ip ->
+                        Log.d(TAG, "Probing $ip via REST API")
+                        apiClient.getDeviceInfo(ip)
+                    }.sortedBy { it.name }
+
+                Log.i(TAG, "Discovery complete: ${devices.size} device(s) found")
+                devices.forEach { Log.i(TAG, "  → ${it.name} @ ${it.ipAddress} (MAC: ${it.macAddress})") }
+
+                _devices.value = devices
             }
-            val subnetDeferred = async {
-                val t0 = System.currentTimeMillis()
-                val results = subnetScanner.scan(10_000)
-                Log.i(TAG, "Subnet scan found ${results.size} devices in ${System.currentTimeMillis() - t0}ms: ${results.map { it.ip }}")
-                results
-            }
-
-            val ssdpResults = ssdpDeferred.await()
-            val subnetResults = subnetDeferred.await()
-
-            val allIps = mutableSetOf<String>()
-            ssdpResults.forEach { allIps.add(it.ip) }
-            subnetResults.forEach { allIps.add(it.ip) }
-            Log.i(TAG, "Total unique IPs to probe: ${allIps.size} — $allIps")
-
-            val devices = allIps.mapNotNull { ip ->
-                Log.d(TAG, "Probing $ip via REST API")
-                apiClient.getDeviceInfo(ip)
-            }.sortedBy { it.name }
-
-            Log.i(TAG, "Discovery complete: ${devices.size} device(s) found")
-            devices.forEach { Log.i(TAG, "  → ${it.name} @ ${it.ipAddress} (MAC: ${it.macAddress})") }
-
-            _devices.value = devices
-        }
     }
 
     fun stopDiscovery() {

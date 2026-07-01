@@ -13,7 +13,6 @@ import com.screenm.local.SessionManager
 import com.screenm.model.DeviceInfo
 
 class ScreenCaptureService : Service() {
-
     private lateinit var sessionManager: SessionManager
 
     override fun onCreate() {
@@ -23,7 +22,11 @@ class ScreenCaptureService : Service() {
         startForeground(NOTIFICATION_ID, createNotification())
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         when (intent?.action) {
             ACTION_START -> handleStart(intent)
             ACTION_STOP -> handleStop()
@@ -33,31 +36,34 @@ class ScreenCaptureService : Service() {
     }
 
     private fun handleStart(intent: Intent) {
-        val mediaProjectionIntent = if (Build.VERSION.SDK_INT >= 33) {
-            intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION, Intent::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION)
-        }
-            ?: run {
-                Log.e(TAG, "Missing MediaProjection intent")
+        val mediaProjectionIntent =
+            if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION, Intent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(EXTRA_MEDIA_PROJECTION)
+            }
+                ?: run {
+                    Log.e(TAG, "Missing MediaProjection intent")
+                    stopSelf()
+                    return
+                }
+
+        val targetIp =
+            intent.getStringExtra(EXTRA_TARGET_IP) ?: run {
+                Log.e(TAG, "Missing target IP")
                 stopSelf()
                 return
             }
 
-        val targetIp = intent.getStringExtra(EXTRA_TARGET_IP) ?: run {
-            Log.e(TAG, "Missing target IP")
-            stopSelf()
-            return
-        }
-
-        val device = DeviceInfo(
-            id = intent.getStringExtra(EXTRA_TARGET_MAC) ?: targetIp,
-            name = intent.getStringExtra(EXTRA_TARGET_NAME) ?: "Samsung TV",
-            ipAddress = targetIp,
-            macAddress = intent.getStringExtra(EXTRA_TARGET_MAC) ?: "",
-            port = intent.getIntExtra(EXTRA_TARGET_PORT, 8001)
-        )
+        val device =
+            DeviceInfo(
+                id = intent.getStringExtra(EXTRA_TARGET_MAC) ?: targetIp,
+                name = intent.getStringExtra(EXTRA_TARGET_NAME) ?: "Samsung TV",
+                ipAddress = targetIp,
+                macAddress = intent.getStringExtra(EXTRA_TARGET_MAC) ?: "",
+                port = intent.getIntExtra(EXTRA_TARGET_PORT, 8001),
+            )
 
         sessionManager.startSession(mediaProjectionIntent, device)
     }
@@ -70,14 +76,15 @@ class ScreenCaptureService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Screen Mirroring",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Screen mirroring is active"
-                setShowBadge(false)
-            }
+            val channel =
+                NotificationChannel(
+                    CHANNEL_ID,
+                    "Screen Mirroring",
+                    NotificationManager.IMPORTANCE_LOW,
+                ).apply {
+                    description = "Screen mirroring is active"
+                    setShowBadge(false)
+                }
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }

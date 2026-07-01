@@ -72,7 +72,7 @@ ktlint {
     android.set(true) // Mengaktifkan aturan penataan/format khusus Android
     verbose.set(true) // Menampilkan informasi lebih detail saat proses linter berjalan
     outputToConsole.set(true)
-    
+
     // Opsional: Jika ingin mengabaikan aturan tertentu secara global
     // disabledRules.set(setOf("no-wildcard-imports"))
 }
@@ -81,15 +81,15 @@ detekt {
     toolVersion = "1.23.8"
     buildUponDefaultConfig = true // Menggunakan aturan bawaan Detekt sebagai basis
     allRules = false // Ubah ke 'true' jika ingin mengaktifkan semua aturan termasuk yang eksperimental
-    
+
     // Jika Anda belum memiliki file konfigurasi detekt.yml, Anda dapat mengomentari baris di bawah ini terlebih dahulu
-    config.setFrom(files("$rootDir/config/detekt/detekt.yml")) 
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
         html.required.set(true) // Menghasilkan laporan berformat HTML agar mudah dibaca di browser
-        xml.required.set(true)  // Menghasilkan laporan berformat XML (berguna untuk integrasi CI/CD)
+        xml.required.set(true) // Menghasilkan laporan berformat XML (berguna untuk integrasi CI/CD)
         txt.required.set(false)
     }
 }

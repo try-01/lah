@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="22"
+        android:translateY="22">
+        <!-- Phone icon -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M16,8h32c2.2,0 4,1.8 4,4v32c0,2.2 -1.8,4 -4,4H16c-2.2,0 -4,-1.8 -4,-4V12c0,-2.2 1.8,-4 4,-4zM18,16v24h28V16H18z" />
+        <!-- TV screen icon -->
+        <path
+            android:fillColor="#6C63FF"
+            android:pathData="M8,44h48v4H36l-2,6H30l-2,-6H8v-4zM24,50h16l-8,8z" />
+    </group>
+</vector>

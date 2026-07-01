@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.7.0" type="partial_results">
+    <map id="UnsafeImplicitIntentLaunch">
+            <map id="actionsSent">
+                    <map id="com.screenm.state.CHANGED (used to send a broadcast)">
+                        <location id="0"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/screenm/local/SessionManager.kt"
+                            line="167"
+                            column="22"
+                            startOffset="6337"
+                            endLine="167"
+                            endColumn="66"
+                            endOffset="6381"/>
+                        <location id="1"
+                            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/screenm/local/SessionManager.kt"
+                            line="229"
+                            column="22"
+                            startOffset="8547"
+                            endLine="229"
+                            endColumn="66"
+                            endOffset="8591"/>
+                    </map>
+            </map>
+    </map>
+    <map id="UnsafeIntentLaunch">
+            <map id="unprotected">
+                <entry
+                    name="android.content.BroadcastReceiver"
+                    boolean="true"/>
+                <entry
+                    name="com.screenm.ui.MainActivity"
+                    boolean="true"/>
+            </map>
+    </map>
+    <map id="UnusedResources">
+        <location id="R.string.app_name"
+            file="${:app*debug*MAIN*sourceProvider*0*resDir*0}/values/strings.xml"
+            line="3"
+            column="13"
+            startOffset="63"
+            endLine="3"
+            endColumn="28"
+            endOffset="78"/>
+        <entry
+            name="model"
+            string="drawable[ic_launcher_background(U),ic_launcher_foreground(U)],mipmap[ic_launcher(U)],string[app_name(D)],style[Theme_ScreenM(U)],xml[network_security_config(U)];2^0^1;;;"/>
+    </map>
+
+</incidents>

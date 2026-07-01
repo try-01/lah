@@ -18,7 +18,6 @@ import java.net.InetSocketAddress
 import java.net.NetworkInterface
 
 class LocalSignalingServer(private val port: Int = 8080) {
-
     private var server: WebSocketServer? = null
     private var tvConnection: WebSocket? = null
 
@@ -33,66 +32,87 @@ class LocalSignalingServer(private val port: Int = 8080) {
 
     val localIp: String? by lazy { findLocalIp() }
 
-    suspend fun start(): Boolean = withContext(Dispatchers.IO) {
-        if (server != null) return@withContext true
-        try {
-            server = object : WebSocketServer(InetSocketAddress(port)) {
-                override fun onOpen(conn: WebSocket, handshake: ClientHandshake) {
-                    Log.i(TAG, "TV connected: ${conn.remoteSocketAddress}")
-                    if (tvConnection != null) {
-                        tvConnection?.close()
+    suspend fun start(): Boolean =
+        withContext(Dispatchers.IO) {
+            if (server != null) return@withContext true
+            try {
+                server =
+                    object : WebSocketServer(InetSocketAddress(port)) {
+                        override fun onOpen(
+                            conn: WebSocket,
+                            handshake: ClientHandshake,
+                        ) {
+                            Log.i(TAG, "TV connected: ${conn.remoteSocketAddress}")
+                            if (tvConnection != null) {
+                                tvConnection?.close()
+                            }
+                            tvConnection = conn
+                            _tvConnected.value = true
+                        }
+
+                        override fun onMessage(
+                            conn: WebSocket,
+                            message: String,
+                        ) {
+                            try {
+                                val json = JSONObject(message)
+                                val type = json.optString("type", "")
+                                val data = json.optJSONObject("data")
+                                _messages.trySend(SignalingMessage(type, data))
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Invalid message: ${e.message}")
+                            }
+                        }
+
+                        override fun onClose(
+                            conn: WebSocket,
+                            code: Int,
+                            reason: String,
+                            remote: Boolean,
+                        ) {
+                            Log.i(TAG, "TV disconnected: $reason")
+                            tvConnection = null
+                            _tvConnected.value = false
+                        }
+
+                        override fun onError(
+                            conn: WebSocket?,
+                            ex: Exception,
+                        ) {
+                            Log.e(TAG, "WS error: ${ex.message}")
+                        }
+
+                        override fun onStart() {
+                            Log.i(TAG, "WS server started on port $port")
+                            _isRunning.value = true
+                        }
                     }
-                    tvConnection = conn
-                    _tvConnected.value = true
-                }
-
-                override fun onMessage(conn: WebSocket, message: String) {
-                    try {
-                        val json = JSONObject(message)
-                        val type = json.optString("type", "")
-                        val data = json.optJSONObject("data")
-                        _messages.trySend(SignalingMessage(type, data))
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Invalid message: ${e.message}")
-                    }
-                }
-
-                override fun onClose(conn: WebSocket, code: Int, reason: String, remote: Boolean) {
-                    Log.i(TAG, "TV disconnected: $reason")
-                    tvConnection = null
-                    _tvConnected.value = false
-                }
-
-                override fun onError(conn: WebSocket?, ex: Exception) {
-                    Log.e(TAG, "WS error: ${ex.message}")
-                }
-
-                override fun onStart() {
-                    Log.i(TAG, "WS server started on port $port")
-                    _isRunning.value = true
-                }
+                server?.setReuseAddr(true)
+                server?.start()
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start WS server: ${e.message}")
+                false
             }
-            server?.setReuseAddr(true)
-            server?.start()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start WS server: ${e.message}")
-            false
         }
-    }
 
-    fun send(type: String, data: JSONObject? = null) {
-        val msg = JSONObject().apply {
-            put("type", type)
-            data?.let { put("data", it) }
-        }
+    fun send(
+        type: String,
+        data: JSONObject? = null,
+    ) {
+        val msg =
+            JSONObject().apply {
+                put("type", type)
+                data?.let { put("data", it) }
+            }
         tvConnection?.send(msg.toString())
     }
 
     fun stop() {
         try {
             server?.stop(1000)
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         server = null
         tvConnection = null
         _tvConnected.value = false
@@ -115,7 +135,8 @@ class LocalSignalingServer(private val port: Int = 8080) {
                 }
             }
             return candidate
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
         return null
     }
 
@@ -126,5 +147,5 @@ class LocalSignalingServer(private val port: Int = 8080) {
 
 data class SignalingMessage(
     val type: String,
-    val data: JSONObject? = null
+    val data: JSONObject? = null,
 )
